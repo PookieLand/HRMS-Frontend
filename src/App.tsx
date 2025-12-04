@@ -58,13 +58,16 @@ function App() {
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center p-6 bg-gradient-to-b from-background to-muted/20">
+      {/* Grid Pattern Background */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(128,128,128,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(128,128,128,0.1)_1px,transparent_1px)] bg-[size:4rem_4rem] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)]" />
+
       {/* Theme Toggle */}
       <div className="fixed top-4 right-4 z-50">
         <AnimatedThemeToggler className="flex items-center justify-center size-10 rounded-lg border bg-background hover:bg-accent transition-colors" />
       </div>
 
       {/* Main Content */}
-      <div className="flex flex-col items-center gap-8 text-center max-w-2xl">
+      <div className="relative flex flex-col items-center gap-8 text-center max-w-2xl">
         {/* Logo */}
         <div className="flex items-center justify-center size-20 rounded-2xl bg-primary shadow-lg">
           <Building2 className="size-10 text-primary-foreground" />
@@ -93,7 +96,6 @@ function App() {
           <Link to="/signup" className="w-full sm:w-auto">
             <Button
               size="lg"
-              variant="outline"
               className="px-8 py-6 text-lg font-semibold gap-2 w-full"
             >
               <UserPlus className="size-5" />
@@ -101,11 +103,6 @@ function App() {
             </Button>
           </Link>
         </div>
-
-        {/* Footer text */}
-        <p className="text-sm text-muted-foreground mt-8">
-          Secure authentication powered by Asgardeo
-        </p>
       </div>
     </div>
   );

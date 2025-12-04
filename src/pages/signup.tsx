@@ -8,7 +8,7 @@ export default function SignupPage() {
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       {/* Left Section - Branding */}
-      <div className="relative hidden lg:flex flex-col justify-between bg-primary p-10 text-primary-foreground">
+      <div className="relative hidden lg:flex flex-col justify-between items-center bg-primary p-10 text-primary-foreground">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
 
@@ -21,19 +21,19 @@ export default function SignupPage() {
         </div>
 
         {/* Main Content */}
-        <div className="relative space-y-6">
+        <div className="relative space-y-6 text-center">
           <h1 className="text-4xl font-bold leading-tight">
             Start managing your
             <br />
             workforce today
           </h1>
-          <p className="text-lg text-primary-foreground/80 max-w-md">
+          <p className="text-lg text-primary-foreground/80 max-w-md mx-auto">
             Join thousands of companies using HRMS to streamline their human
             resource operations.
           </p>
 
           {/* Features List */}
-          <ul className="space-y-3 text-primary-foreground/90">
+          <ul className="space-y-3 text-primary-foreground/90 inline-block text-left">
             <li className="flex items-center gap-2">
               <span className="flex size-6 items-center justify-center rounded-full bg-primary-foreground/20">
                 ✓
