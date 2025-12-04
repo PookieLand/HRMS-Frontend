@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -5,16 +7,150 @@ import {
   FieldDescription,
   FieldGroup,
   FieldLabel,
-  FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { signup, type SignupRequest } from "@/lib/api/auth";
+import { useAlert } from "@/contexts/AlertContext";
 
 export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
+  const navigate = useNavigate();
+  const { showAlert } = useAlert();
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    // Validate first name
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = "First name is required";
+    }
+
+    // Validate last name
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = "Last name is required";
+    }
+
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email) {
+      newErrors.email = "Email is required";
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
+    // Validate phone
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Phone number is required";
+    } else if (!/^\+?[\d\s-()]+$/.test(formData.phone)) {
+      newErrors.phone = "Please enter a valid phone number";
+    }
+
+    // Validate password
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    } else if (formData.password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters long";
+    } else if (!/(?=.*[a-z])/.test(formData.password)) {
+      newErrors.password =
+        "Password must contain at least one lowercase letter";
+    } else if (!/(?=.*[A-Z])/.test(formData.password)) {
+      newErrors.password =
+        "Password must contain at least one uppercase letter";
+    } else if (!/(?=.*\d)/.test(formData.password)) {
+      newErrors.password = "Password must contain at least one number";
+    } else if (
+      !/(?=.*[!@#$%^&*()_+\-=[\]{}|;:,.<>?])/.test(formData.password)
+    ) {
+      newErrors.password =
+        "Password must contain at least one special character";
+    }
+
+    // Validate confirm password
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = "Please confirm your password";
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+    // Clear error for this field when user starts typing
+    if (errors[id]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[id];
+        return newErrors;
+      });
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const signupData: SignupRequest = {
+        email: formData.email,
+        password: formData.password,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        phone: formData.phone,
+      };
+
+      await signup(signupData);
+
+      // Set flag to show notification on home page
+      sessionStorage.setItem("justSignedUp", "true");
+
+      // Redirect to home page
+      navigate({ to: "/" });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to create account. Please try again.";
+
+      showAlert({
+        title: "Signup Failed",
+        message: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <form className={cn("flex flex-col gap-6", className)} {...props}>
+    <form
+      className={cn("flex flex-col gap-6", className)}
+      onSubmit={handleSubmit}
+      {...props}
+    >
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="text-2xl font-bold">Create your account</h1>
@@ -22,46 +158,138 @@ export function SignupForm({
             Fill in the form below to create your account
           </p>
         </div>
+
         <Field>
-          <FieldLabel htmlFor="name">Full Name</FieldLabel>
-          <Input id="name" type="text" placeholder="John Doe" required />
+          <FieldLabel htmlFor="firstName">First Name</FieldLabel>
+          <Input
+            id="firstName"
+            type="text"
+            placeholder="John"
+            value={formData.firstName}
+            onChange={handleInputChange}
+            disabled={isLoading}
+            required
+            className={errors.firstName ? "border-destructive" : ""}
+          />
+          {errors.firstName && (
+            <FieldDescription className="text-destructive">
+              {errors.firstName}
+            </FieldDescription>
+          )}
         </Field>
+
+        <Field>
+          <FieldLabel htmlFor="lastName">Last Name</FieldLabel>
+          <Input
+            id="lastName"
+            type="text"
+            placeholder="Doe"
+            value={formData.lastName}
+            onChange={handleInputChange}
+            disabled={isLoading}
+            required
+            className={errors.lastName ? "border-destructive" : ""}
+          />
+          {errors.lastName && (
+            <FieldDescription className="text-destructive">
+              {errors.lastName}
+            </FieldDescription>
+          )}
+        </Field>
+
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
-          <Input id="email" type="email" placeholder="m@example.com" required />
-          <FieldDescription>
-            We&apos;ll use this to contact you. We will not share your email
-            with anyone else.
-          </FieldDescription>
+          <Input
+            id="email"
+            type="email"
+            placeholder="john.doe@example.com"
+            value={formData.email}
+            onChange={handleInputChange}
+            disabled={isLoading}
+            required
+            className={errors.email ? "border-destructive" : ""}
+          />
+          {errors.email ? (
+            <FieldDescription className="text-destructive">
+              {errors.email}
+            </FieldDescription>
+          ) : (
+            <FieldDescription></FieldDescription>
+          )}
         </Field>
+
+        <Field>
+          <FieldLabel htmlFor="phone">Phone Number</FieldLabel>
+          <Input
+            id="phone"
+            type="tel"
+            placeholder="+1 (555) 123-4567"
+            value={formData.phone}
+            onChange={handleInputChange}
+            disabled={isLoading}
+            required
+            className={errors.phone ? "border-destructive" : ""}
+          />
+          {errors.phone && (
+            <FieldDescription className="text-destructive">
+              {errors.phone}
+            </FieldDescription>
+          )}
+        </Field>
+
         <Field>
           <FieldLabel htmlFor="password">Password</FieldLabel>
-          <Input id="password" type="password" required />
-          <FieldDescription>
-            Must be at least 8 characters long.
-          </FieldDescription>
+          <Input
+            id="password"
+            type="password"
+            value={formData.password}
+            onChange={handleInputChange}
+            disabled={isLoading}
+            required
+            className={errors.password ? "border-destructive" : ""}
+          />
+          {errors.password ? (
+            <FieldDescription className="text-destructive">
+              {errors.password}
+            </FieldDescription>
+          ) : (
+            <FieldDescription>
+              Must be at least 8 characters with uppercase, lowercase, number,
+              and special character.
+            </FieldDescription>
+          )}
         </Field>
+
         <Field>
-          <FieldLabel htmlFor="confirm-password">Confirm Password</FieldLabel>
-          <Input id="confirm-password" type="password" required />
-          <FieldDescription>Please confirm your password.</FieldDescription>
+          <FieldLabel htmlFor="confirmPassword">Confirm Password</FieldLabel>
+          <Input
+            id="confirmPassword"
+            type="password"
+            value={formData.confirmPassword}
+            onChange={handleInputChange}
+            disabled={isLoading}
+            required
+            className={errors.confirmPassword ? "border-destructive" : ""}
+          />
+          {errors.confirmPassword && (
+            <FieldDescription className="text-destructive">
+              {errors.confirmPassword}
+            </FieldDescription>
+          )}
         </Field>
+
         <Field>
-          <Button type="submit">Create Account</Button>
-        </Field>
-        <FieldSeparator>Or continue with</FieldSeparator>
-        <Field>
-          <Button variant="outline" type="button">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <path
-                d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
-                fill="currentColor"
-              />
-            </svg>
-            Sign up with GitHub
+          <Button type="submit" disabled={isLoading} className="w-full">
+            {isLoading ? "Creating Account..." : "Create Account"}
           </Button>
+        </Field>
+
+        <Field>
           <FieldDescription className="px-6 text-center">
-            Already have an account? <a href="#">Sign in</a>
+            Already have an account?{" "}
+            <a href="/" className="text-primary hover:underline font-medium">
+              Sign in
+            </a>
           </FieldDescription>
         </Field>
       </FieldGroup>

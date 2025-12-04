@@ -2,21 +2,20 @@
 
 import * as React from "react";
 import { useAsgardeo } from "@asgardeo/react";
+import { Link } from "@tanstack/react-router";
 import {
-  BookOpen,
-  Bot,
   Building2,
-  Frame,
+  CalendarDays,
+  Home,
   LifeBuoy,
-  Map,
-  PieChart,
   Send,
-  Settings2,
-  SquareTerminal,
+  Settings,
+  Users,
+  Clock,
+  BarChart3,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
-import { NavProjects } from "@/components/nav-projects";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
 import {
@@ -60,63 +59,87 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const data = {
     navMain: [
       {
-        title: "Playground",
-        url: "#",
-        icon: SquareTerminal,
+        title: "Dashboard",
+        url: "/dashboard",
+        icon: Home,
         isActive: true,
+      },
+      {
+        title: "Employees",
+        url: "#",
+        icon: Users,
         items: [
           {
-            title: "History",
+            title: "All Employees",
             url: "#",
           },
           {
-            title: "Starred",
+            title: "Departments",
             url: "#",
           },
           {
-            title: "Settings",
+            title: "Positions",
             url: "#",
           },
         ],
       },
       {
-        title: "Models",
+        title: "Attendance",
         url: "#",
-        icon: Bot,
+        icon: Clock,
         items: [
           {
-            title: "Genesis",
+            title: "Check In/Out",
             url: "#",
           },
           {
-            title: "Explorer",
+            title: "My Attendance",
             url: "#",
           },
           {
-            title: "Quantum",
+            title: "Attendance Reports",
             url: "#",
           },
         ],
       },
       {
-        title: "Documentation",
+        title: "Leave Management",
         url: "#",
-        icon: BookOpen,
+        icon: CalendarDays,
         items: [
           {
-            title: "Introduction",
+            title: "Request Leave",
             url: "#",
           },
           {
-            title: "Get Started",
+            title: "My Leaves",
             url: "#",
           },
           {
-            title: "Tutorials",
+            title: "Pending Approvals",
             url: "#",
           },
           {
-            title: "Changelog",
+            title: "Leave Calendar",
+            url: "#",
+          },
+        ],
+      },
+      {
+        title: "Reports",
+        url: "#",
+        icon: BarChart3,
+        items: [
+          {
+            title: "Attendance Report",
+            url: "#",
+          },
+          {
+            title: "Leave Report",
+            url: "#",
+          },
+          {
+            title: "Employee Report",
             url: "#",
           },
         ],
@@ -124,22 +147,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       {
         title: "Settings",
         url: "#",
-        icon: Settings2,
+        icon: Settings,
         items: [
           {
             title: "General",
             url: "#",
           },
           {
-            title: "Team",
+            title: "Notifications",
             url: "#",
           },
           {
-            title: "Billing",
-            url: "#",
-          },
-          {
-            title: "Limits",
+            title: "Security",
             url: "#",
           },
         ],
@@ -157,23 +176,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: Send,
       },
     ],
-    projects: [
-      {
-        name: "Design Engineering",
-        url: "#",
-        icon: Frame,
-      },
-      {
-        name: "Sales & Marketing",
-        url: "#",
-        icon: PieChart,
-      },
-      {
-        name: "Travel",
-        url: "#",
-        icon: Map,
-      },
-    ],
   };
 
   return (
@@ -182,7 +184,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="/">
+              <Link to="/dashboard">
                 <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                   <Building2 className="size-4" />
                 </div>
@@ -192,14 +194,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     Human Resource Management
                   </span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
