@@ -80,28 +80,6 @@ function App() {
           </p>
         </div>
 
-        {/* Feature highlights */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full mt-4">
-          <div className="flex flex-col items-center gap-2 p-4 rounded-lg bg-card border">
-            <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="text-xl">👥</span>
-            </div>
-            <span className="font-medium">Employee Management</span>
-          </div>
-          <div className="flex flex-col items-center gap-2 p-4 rounded-lg bg-card border">
-            <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="text-xl">📅</span>
-            </div>
-            <span className="font-medium">Leave Tracking</span>
-          </div>
-          <div className="flex flex-col items-center gap-2 p-4 rounded-lg bg-card border">
-            <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="text-xl">⏰</span>
-            </div>
-            <span className="font-medium">Attendance</span>
-          </div>
-        </div>
-
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 mt-6 w-full sm:w-auto">
           <Button
