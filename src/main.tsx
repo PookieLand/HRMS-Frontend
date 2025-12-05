@@ -13,6 +13,7 @@ import { AsgardeoProvider } from "@asgardeo/react";
 import "./styles.css";
 import reportWebVitals from "./reportWebVitals.ts";
 import { AlertProvider } from "./contexts/AlertContext.tsx";
+import { NotificationProvider } from "./contexts/NotificationContext.tsx";
 
 import App from "./App.tsx";
 import LoginPage from "./pages/login.tsx";
@@ -150,7 +151,9 @@ if (rootElement && !rootElement.innerHTML) {
         baseUrl={import.meta.env.VITE_ORG_BASE_URL || ""}
       >
         <AlertProvider>
-          <RouterProvider router={router} />
+          <NotificationProvider>
+            <RouterProvider router={router} />
+          </NotificationProvider>
         </AlertProvider>
       </AsgardeoProvider>
     </StrictMode>,
