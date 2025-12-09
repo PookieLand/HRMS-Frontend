@@ -2,11 +2,16 @@
 // Handles all API calls for the HR Dashboard
 
 // Service URLs - configured via environment variables
-const USER_SERVICE_URL = import.meta.env.VITE_USER_SERVICE_URL || 'http://localhost:8000';
-const EMPLOYEE_SERVICE_URL = import.meta.env.VITE_EMPLOYEE_SERVICE_URL || 'http://localhost:8001';
-const ATTENDANCE_SERVICE_URL = import.meta.env.VITE_ATTENDANCE_SERVICE_URL || 'http://localhost:8002';
-const LEAVE_SERVICE_URL = import.meta.env.VITE_LEAVE_SERVICE_URL || 'http://localhost:8003';
-const AUDIT_SERVICE_URL = import.meta.env.VITE_AUDIT_SERVICE_URL || 'http://localhost:8004';
+const USER_SERVICE_URL =
+  import.meta.env.VITE_USER_SERVICE_URL || "http://localhost:8000";
+const EMPLOYEE_SERVICE_URL =
+  import.meta.env.VITE_EMPLOYEE_SERVICE_URL || "http://localhost:8001";
+const ATTENDANCE_SERVICE_URL =
+  import.meta.env.VITE_ATTENDANCE_SERVICE_URL || "http://localhost:8002";
+const LEAVE_SERVICE_URL =
+  import.meta.env.VITE_LEAVE_SERVICE_URL || "http://localhost:8003";
+const AUDIT_SERVICE_URL =
+  import.meta.env.VITE_AUDIT_SERVICE_URL || "http://localhost:8004";
 
 // Types
 export interface Employee {
@@ -40,7 +45,7 @@ export interface AttendanceRecord {
   date: string;
   check_in_time?: string;
   check_out_time?: string;
-  status: 'present' | 'absent' | 'late' | 'pending';
+  status: "present" | "absent" | "late" | "pending";
   work_hours?: number;
 }
 
@@ -60,7 +65,7 @@ export interface LeaveRequest {
   start_date: string;
   end_date: string;
   reason: string;
-  status: 'pending' | 'approved' | 'rejected' | 'cancelled';
+  status: "pending" | "approved" | "rejected" | "cancelled";
   days_count?: number;
   created_at: string;
 }
@@ -91,13 +96,13 @@ export interface DashboardData {
 async function fetchWithAuth<T>(
   url: string,
   accessToken: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<T> {
   const response = await fetch(url, {
     ...options,
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
       ...options.headers,
     },
   });
@@ -111,15 +116,23 @@ async function fetchWithAuth<T>(
 }
 
 // Employee Service API
+// Response type for paginated employee list
+interface EmployeeListResponse {
+  total: number;
+  employees: Employee[];
+}
+
 export async function getEmployees(
   accessToken: string,
   offset: number = 0,
-  limit: number = 100
+  limit: number = 100,
 ): Promise<Employee[]> {
-  return fetchWithAuth<Employee[]>(
+  const response = await fetchWithAuth<EmployeeListResponse>(
     `${EMPLOYEE_SERVICE_URL}/api/v1/employees?offset=${offset}&limit=${limit}`,
-    accessToken
+    accessToken,
   );
+  // API returns { total, employees }, extract the array
+  return Array.isArray(response) ? response : (response.employees ?? []);
 }
 
 export async function getEmployeeCount(accessToken: string): Promise<number> {
@@ -130,7 +143,7 @@ export async function getEmployeeCount(accessToken: string): Promise<number> {
 // Attendance Service API
 export async function getAttendanceDashboard(
   accessToken: string,
-  date?: string
+  date?: string,
 ): Promise<AttendanceDashboard> {
   const url = date
     ? `${ATTENDANCE_SERVICE_URL}/api/v1/attendance/dashboard?date=${date}`
@@ -138,11 +151,13 @@ export async function getAttendanceDashboard(
   return fetchWithAuth<AttendanceDashboard>(url, accessToken);
 }
 
-export async function getMyAttendanceToday(accessToken: string): Promise<AttendanceRecord | null> {
+export async function getMyAttendanceToday(
+  accessToken: string,
+): Promise<AttendanceRecord | null> {
   try {
     return await fetchWithAuth<AttendanceRecord>(
       `${ATTENDANCE_SERVICE_URL}/api/v1/attendance/me/today`,
-      accessToken
+      accessToken,
     );
   } catch {
     return null;
@@ -150,40 +165,48 @@ export async function getMyAttendanceToday(accessToken: string): Promise<Attenda
 }
 
 // Leave Service API
-export async function getLeaveSummary(accessToken: string): Promise<LeaveSummary> {
+export async function getLeaveSummary(
+  accessToken: string,
+): Promise<LeaveSummary> {
   return fetchWithAuth<LeaveSummary>(
     `${LEAVE_SERVICE_URL}/api/v1/leave/dashboard/summary`,
-    accessToken
+    accessToken,
   );
 }
 
-export async function getPendingLeaves(accessToken: string): Promise<LeaveRequest[]> {
+export async function getPendingLeaves(
+  accessToken: string,
+): Promise<LeaveRequest[]> {
   return fetchWithAuth<LeaveRequest[]>(
     `${LEAVE_SERVICE_URL}/api/v1/leave/pending`,
-    accessToken
+    accessToken,
   );
 }
 
-export async function getMyLeaves(accessToken: string): Promise<LeaveRequest[]> {
+export async function getMyLeaves(
+  accessToken: string,
+): Promise<LeaveRequest[]> {
   return fetchWithAuth<LeaveRequest[]>(
     `${LEAVE_SERVICE_URL}/api/v1/leave/me`,
-    accessToken
+    accessToken,
   );
 }
 
 // Audit Service API
 export async function getRecentAuditLogs(
   accessToken: string,
-  limit: number = 10
+  limit: number = 10,
 ): Promise<AuditLog[]> {
   return fetchWithAuth<AuditLog[]>(
     `${AUDIT_SERVICE_URL}/api/v1/audit-logs?limit=${limit}`,
-    accessToken
+    accessToken,
   );
 }
 
 // Dashboard Data Loader - Loads all data in parallel
-export async function loadDashboardData(accessToken: string): Promise<DashboardData> {
+export async function loadDashboardData(
+  accessToken: string,
+): Promise<DashboardData> {
   const results = await Promise.allSettled([
     getEmployees(accessToken, 0, 100),
     getAttendanceDashboard(accessToken),
@@ -192,11 +215,15 @@ export async function loadDashboardData(accessToken: string): Promise<DashboardD
     getRecentAuditLogs(accessToken, 10),
   ]);
 
-  const employees = results[0].status === 'fulfilled' ? results[0].value : [];
-  const attendanceSummary = results[1].status === 'fulfilled' ? results[1].value : null;
-  const leaveSummary = results[2].status === 'fulfilled' ? results[2].value : null;
-  const recentLeaves = results[3].status === 'fulfilled' ? results[3].value : [];
-  const recentAuditLogs = results[4].status === 'fulfilled' ? results[4].value : [];
+  const employees = results[0].status === "fulfilled" ? results[0].value : [];
+  const attendanceSummary =
+    results[1].status === "fulfilled" ? results[1].value : null;
+  const leaveSummary =
+    results[2].status === "fulfilled" ? results[2].value : null;
+  const recentLeaves =
+    results[3].status === "fulfilled" ? results[3].value : [];
+  const recentAuditLogs =
+    results[4].status === "fulfilled" ? results[4].value : [];
 
   return {
     employees,

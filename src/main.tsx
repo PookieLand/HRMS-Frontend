@@ -24,6 +24,9 @@ import JWTTokenPage from "./pages/jwt-token.tsx";
 import RouterErrorComponent from "./components/router-error.tsx";
 import SignUpPage from "./pages/signup.tsx";
 import Dashboard from "./pages/dashboard/dashboard.tsx";
+import UsersPage from "./pages/dashboard/users/index.tsx";
+import OnboardPage from "./pages/dashboard/users/onboard.tsx";
+import EmployeeSignupPage from "./pages/employee-signup.tsx";
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -62,7 +65,17 @@ const signupRoute = createRoute({
   component: SignUpPage,
   errorComponent: RouterErrorComponent,
   beforeLoad: () => {
-    document.title = "signup - hrms";
+    document.title = "Sign Up - HRMS";
+  },
+});
+
+const employeeSignupRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/employee-signup",
+  component: EmployeeSignupPage,
+  errorComponent: RouterErrorComponent,
+  beforeLoad: () => {
+    document.title = "Complete Your Registration - HRMS";
   },
 });
 
@@ -114,6 +127,26 @@ const dashboardRoute = createRoute({
   },
 });
 
+const usersRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard/users",
+  component: UsersPage,
+  errorComponent: RouterErrorComponent,
+  beforeLoad: () => {
+    document.title = "User Management - HRMS";
+  },
+});
+
+const onboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard/users/onboard",
+  component: OnboardPage,
+  errorComponent: RouterErrorComponent,
+  beforeLoad: () => {
+    document.title = "Onboard Employee - HRMS";
+  },
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
@@ -122,7 +155,10 @@ const routeTree = rootRoute.addChildren([
   jwtTokenRoute,
   notFoundRoute,
   signupRoute,
+  employeeSignupRoute,
   dashboardRoute,
+  usersRoute,
+  onboardRoute,
 ]);
 
 const router = createRouter({
@@ -149,6 +185,7 @@ if (rootElement && !rootElement.innerHTML) {
       <AsgardeoProvider
         clientId={import.meta.env.VITE_CLIENT_ID || ""}
         baseUrl={import.meta.env.VITE_ORG_BASE_URL || ""}
+        scopes={["openid", "profile", "email", "groups"]}
       >
         <AlertProvider>
           <NotificationProvider>

@@ -28,8 +28,47 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
+type UserRole = "HR_Admin" | "HR_Manager" | "manager" | "employee";
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { user } = useAsgardeo();
+  const { user, getDecodedIdToken } = useAsgardeo();
+  const [currentRole, setCurrentRole] = React.useState<UserRole>("employee");
+
+  // Determine user role from groups
+  React.useEffect(() => {
+    const determineRole = async () => {
+      try {
+        const decodedToken = await getDecodedIdToken();
+        const groups = (decodedToken?.groups as string[]) || [];
+
+        if (
+          groups.includes("HR_Administrators") ||
+          groups.includes("HR_Admin") ||
+          groups.includes("HR-Administrators")
+        ) {
+          setCurrentRole("HR_Admin");
+        } else if (
+          groups.includes("HR_Managers") ||
+          groups.includes("HR_Manager") ||
+          groups.includes("HR-Managers")
+        ) {
+          setCurrentRole("HR_Manager");
+        } else if (
+          groups.includes("Managers") ||
+          groups.includes("manager") ||
+          groups.includes("Manager")
+        ) {
+          setCurrentRole("manager");
+        } else {
+          setCurrentRole("employee");
+        }
+      } catch (error) {
+        console.error("Error determining role:", error);
+      }
+    };
+
+    determineRole();
+  }, [getDecodedIdToken]);
 
   // Handle Asgardeo user object where name can be an object with familyName and givenName
   const getUserDisplayName = () => {
@@ -56,6 +95,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     avatar: user?.profilePicture || user?.picture || "",
   };
 
+  // Check if user can manage users
+  const canManageUsers =
+    currentRole === "HR_Admin" || currentRole === "HR_Manager";
+
   const data = {
     navMain: [
       {
@@ -64,6 +107,26 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: Home,
         isActive: true,
       },
+      // User Management - only for HR roles
+      ...(canManageUsers
+        ? [
+            {
+              title: "User Management",
+              url: "/dashboard/users",
+              icon: Users,
+              items: [
+                {
+                  title: "All Users",
+                  url: "/dashboard/users",
+                },
+                {
+                  title: "Onboard Employee",
+                  url: "/dashboard/users/onboard",
+                },
+              ],
+            },
+          ]
+        : []),
       {
         title: "Employees",
         url: "#",
@@ -190,6 +253,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">HRMS</span>
+                  {canManageUsers && (
+                    <span className="truncate text-xs text-muted-foreground">
+                      {currentRole === "HR_Admin"
+                        ? "Administrator"
+                        : "HR Manager"}
+                    </span>
+                  )}
                 </div>
               </Link>
             </SidebarMenuButton>

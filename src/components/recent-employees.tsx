@@ -41,11 +41,14 @@ function getInitials(firstName: string, lastName: string): string {
   return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
 }
 
-const contractTypeVariants: Record<string, "default" | "secondary" | "outline"> = {
+const contractTypeVariants: Record<
+  string,
+  "default" | "secondary" | "outline"
+> = {
   "Full-Time": "default",
   "Part-Time": "secondary",
-  "Contract": "outline",
-  "Intern": "outline",
+  Contract: "outline",
+  Intern: "outline",
 };
 
 export function RecentEmployees({
@@ -59,7 +62,12 @@ export function RecentEmployees({
     return <RecentEmployeesSkeleton title={title} description={description} />;
   }
 
-  if (!data || data.length === 0) {
+  // Ensure data is an array (API might return object with employees array)
+  const employeesArray = Array.isArray(data)
+    ? data
+    : ((data as unknown as { employees?: Employee[] })?.employees ?? []);
+
+  if (!employeesArray || employeesArray.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -78,7 +86,7 @@ export function RecentEmployees({
     );
   }
 
-  const displayedEmployees = data.slice(0, limit);
+  const displayedEmployees = employeesArray.slice(0, limit);
 
   return (
     <Card>
@@ -118,9 +126,7 @@ export function RecentEmployees({
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm">
-                    {employee.position}
-                  </TableCell>
+                  <TableCell className="text-sm">{employee.position}</TableCell>
                   <TableCell>
                     <Badge variant="outline" className="font-normal">
                       {employee.department}
@@ -128,7 +134,10 @@ export function RecentEmployees({
                   </TableCell>
                   <TableCell>
                     <Badge
-                      variant={contractTypeVariants[employee.contract_type] || "outline"}
+                      variant={
+                        contractTypeVariants[employee.contract_type] ||
+                        "outline"
+                      }
                       className="font-normal"
                     >
                       {employee.contract_type}
@@ -142,9 +151,9 @@ export function RecentEmployees({
             </TableBody>
           </Table>
         </div>
-        {data.length > limit && (
+        {employeesArray.length > limit && (
           <p className="text-sm text-muted-foreground mt-4 text-center">
-            Showing {limit} of {data.length} employees
+            Showing {limit} of {employeesArray.length} employees
           </p>
         )}
       </CardContent>
