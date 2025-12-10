@@ -4,13 +4,24 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <meta name="theme-color" content="#18181b" />
+        <meta name="theme-color" content="#0a0a0a" />
         <meta
             name="description"
             content="HRMS - Human Resource Management System"
         />
 
         <title>HRMS - Human Resource Management System</title>
+
+        <!-- Preconnect for performance -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+        <!-- Sora - Distinctive geometric sans-serif for headings -->
+        <!-- JetBrains Mono - For numerical/tabular data -->
+        <link
+            href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+            rel="stylesheet"
+        />
 
         <!-- Load theme from localStorage before page renders to prevent flash -->
         <script>
@@ -27,6 +38,30 @@
                 }
             })();
         </script>
+
+        <style>
+            /* Critical CSS for preventing FOUC */
+            :root {
+                --font-sans: "Sora", system-ui, sans-serif;
+                --font-mono: "JetBrains Mono", ui-monospace, monospace;
+            }
+
+            html {
+                font-family: var(--font-sans);
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+
+            /* Smooth page transitions */
+            html.dark {
+                color-scheme: dark;
+            }
+
+            /* Initial loading state */
+            #app {
+                min-height: 100vh;
+            }
+        </style>
     </head>
     <body>
         <div id="app"></div>

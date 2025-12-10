@@ -4,34 +4,37 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ============================================================================
+   HRMS Design System
+   A cohesive, modern aesthetic inspired by shadcn - black/white with warm accents
+   ============================================================================ */
+
 @theme inline {
+    /* Animation keyframes */
     --animate-rainbow: rainbow var(--speed, 2s) infinite linear;
+    --animate-fade-in: fade-in 0.5s ease-out forwards;
+    --animate-fade-in-up: fade-in-up 0.5s ease-out forwards;
+    --animate-slide-in-left: slide-in-left 0.4s ease-out forwards;
+    --animate-scale-in: scale-in 0.3s ease-out forwards;
+    --animate-pulse-subtle: pulse-subtle 2s ease-in-out infinite;
 
+    /* Rainbow colors for special effects */
     --color-color-5: var(--color-5);
-
     --color-color-4: var(--color-4);
-
     --color-color-3: var(--color-3);
-
     --color-color-2: var(--color-2);
-
     --color-color-1: var(--color-1);
 
+    /* Sidebar tokens */
     --color-sidebar-ring: var(--sidebar-ring);
-
     --color-sidebar-border: var(--sidebar-border);
-
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-
     --color-sidebar-accent: var(--sidebar-accent);
-
     --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-
     --color-sidebar-primary: var(--sidebar-primary);
-
     --color-sidebar-foreground: var(--sidebar-foreground);
-
     --color-sidebar: var(--sidebar);
+
     @keyframes rainbow {
         0% {
             background-position: 0%;
@@ -40,45 +43,139 @@
             background-position: 200%;
         }
     }
+
+    @keyframes fade-in {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes fade-in-up {
+        from {
+            opacity: 0;
+            transform: translateY(16px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slide-in-left {
+        from {
+            opacity: 0;
+            transform: translateX(-16px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes scale-in {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @keyframes pulse-subtle {
+        0%,
+        100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.7;
+        }
+    }
 }
 
+/* ============================================================================
+   Light Theme - Clean whites with subtle warmth
+   ============================================================================ */
 :root {
+    /* Typography */
+    --font-sans: "Sora", system-ui, -apple-system, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", monospace;
+
+    /* Rainbow accent colors */
     --color-1: oklch(66.2% 0.225 25.9);
     --color-2: oklch(60.4% 0.26 302);
     --color-3: oklch(69.6% 0.165 251);
     --color-4: oklch(80.2% 0.134 225);
     --color-5: oklch(90.7% 0.231 133);
 
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    /* Core palette - warm white base */
+    --background: 0 0% 99%;
+    --foreground: 0 0% 6%;
+
+    /* Card surfaces with subtle warmth */
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 0 0% 6%;
+
+    /* Popover */
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
+    --popover-foreground: 0 0% 6%;
+
+    /* Primary - deep charcoal */
+    --primary: 0 0% 8%;
     --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
+
+    /* Secondary */
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 12%;
+
+    /* Muted surfaces */
+    --muted: 40 10% 96%;
+    --muted-foreground: 0 0% 40%;
+
+    /* Accent */
+    --accent: 40 10% 95%;
+    --accent-foreground: 0 0% 12%;
+
+    /* Destructive */
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
-    --radius: 0.5rem;
-    --sidebar: hsl(0 0% 98%);
-    --sidebar-foreground: hsl(240 5.3% 26.1%);
-    --sidebar-primary: hsl(240 5.9% 10%);
+
+    /* Borders - subtle warm gray */
+    --border: 40 6% 90%;
+    --input: 40 6% 90%;
+    --ring: 0 0% 8%;
+
+    /* Border radius */
+    --radius: 0.625rem;
+
+    /* Sidebar - slightly cooler for contrast */
+    --sidebar: hsl(0 0% 99%);
+    --sidebar-foreground: hsl(0 0% 20%);
+    --sidebar-primary: hsl(0 0% 8%);
     --sidebar-primary-foreground: hsl(0 0% 98%);
-    --sidebar-accent: hsl(240 4.8% 95.9%);
-    --sidebar-accent-foreground: hsl(240 5.9% 10%);
-    --sidebar-border: hsl(220 13% 91%);
-    --sidebar-ring: hsl(217.2 91.2% 59.8%);
+    --sidebar-accent: hsl(40 10% 96%);
+    --sidebar-accent-foreground: hsl(0 0% 12%);
+    --sidebar-border: hsl(40 6% 92%);
+    --sidebar-ring: hsl(0 0% 8%);
+
+    /* Status colors - consistent across the app */
+    --status-success: 142 76% 36%;
+    --status-success-bg: 142 76% 95%;
+    --status-warning: 38 92% 50%;
+    --status-warning-bg: 38 92% 95%;
+    --status-error: 0 84% 60%;
+    --status-error-bg: 0 84% 95%;
+    --status-info: 214 100% 50%;
+    --status-info-bg: 214 100% 95%;
 }
 
+/* ============================================================================
+   Dark Theme - Rich blacks with depth
+   ============================================================================ */
 .dark {
     --color-1: oklch(66.2% 0.225 25.9);
     --color-2: oklch(60.4% 0.26 302);
@@ -86,48 +183,488 @@
     --color-4: oklch(80.2% 0.134 225);
     --color-5: oklch(90.7% 0.231 133);
 
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    /* Core palette - rich black */
+    --background: 0 0% 4%;
+    --foreground: 0 0% 95%;
+
+    /* Card surfaces - elevated from background */
+    --card: 0 0% 6%;
+    --card-foreground: 0 0% 95%;
+
+    /* Popover */
+    --popover: 0 0% 6%;
+    --popover-foreground: 0 0% 95%;
+
+    /* Primary - bright white */
+    --primary: 0 0% 95%;
+    --primary-foreground: 0 0% 6%;
+
+    /* Secondary */
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 95%;
+
+    /* Muted surfaces */
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 55%;
+
+    /* Accent */
+    --accent: 0 0% 14%;
+    --accent-foreground: 0 0% 95%;
+
+    /* Destructive */
+    --destructive: 0 62% 45%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-    --sidebar: hsl(240 5.9% 10%);
-    --sidebar-foreground: hsl(240 4.8% 95.9%);
-    --sidebar-primary: hsl(224.3 76.3% 48%);
-    --sidebar-primary-foreground: hsl(0 0% 100%);
-    --sidebar-accent: hsl(240 3.7% 15.9%);
-    --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
-    --sidebar-border: hsl(240 3.7% 15.9%);
-    --sidebar-ring: hsl(217.2 91.2% 59.8%);
+
+    /* Borders */
+    --border: 0 0% 14%;
+    --input: 0 0% 14%;
+    --ring: 0 0% 85%;
+
+    /* Sidebar */
+    --sidebar: hsl(0 0% 5%);
+    --sidebar-foreground: hsl(0 0% 90%);
+    --sidebar-primary: hsl(0 0% 95%);
+    --sidebar-primary-foreground: hsl(0 0% 6%);
+    --sidebar-accent: hsl(0 0% 12%);
+    --sidebar-accent-foreground: hsl(0 0% 95%);
+    --sidebar-border: hsl(0 0% 12%);
+    --sidebar-ring: hsl(0 0% 85%);
+
+    /* Status colors for dark mode */
+    --status-success: 142 70% 45%;
+    --status-success-bg: 142 70% 12%;
+    --status-warning: 38 92% 50%;
+    --status-warning-bg: 38 50% 12%;
+    --status-error: 0 72% 51%;
+    --status-error-bg: 0 50% 12%;
+    --status-info: 214 100% 60%;
+    --status-info-bg: 214 50% 12%;
 }
 
+/* ============================================================================
+   Base Layer
+   ============================================================================ */
 @layer base {
     * {
         border-color: hsl(var(--border));
         outline-color: hsl(var(--ring) / 0.5);
     }
+
+    html {
+        font-family: var(--font-sans);
+        font-feature-settings: "cv11", "ss01";
+        font-variation-settings: "opsz" 32;
+    }
+
     body {
         background-color: hsl(var(--background));
         color: hsl(var(--foreground));
+        font-feature-settings:
+            "rlig" 1,
+            "calt" 1;
+    }
+
+    /* Improved focus states */
+    :focus-visible {
+        outline: 2px solid hsl(var(--ring));
+        outline-offset: 2px;
+    }
+
+    /* Better selection colors */
+    ::selection {
+        background-color: hsl(var(--primary) / 0.15);
+        color: hsl(var(--foreground));
+    }
+
+    .dark ::selection {
+        background-color: hsl(var(--primary) / 0.3);
+    }
+
+    /* Smooth scrolling */
+    html {
+        scroll-behavior: smooth;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        html {
+            scroll-behavior: auto;
+        }
+
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
     }
 }
 
+/* ============================================================================
+   Typography Utilities
+   ============================================================================ */
+@layer utilities {
+    .font-display {
+        font-family: var(--font-sans);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+
+    .font-mono {
+        font-family: var(--font-mono);
+    }
+
+    .text-balance {
+        text-wrap: balance;
+    }
+
+    /* Tabular numbers for data display */
+    .tabular-nums {
+        font-variant-numeric: tabular-nums;
+        font-family: var(--font-mono);
+    }
+
+    /* Gradient text */
+    .text-gradient {
+        background: linear-gradient(
+            135deg,
+            hsl(var(--foreground)) 0%,
+            hsl(var(--muted-foreground)) 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+}
+
+/* ============================================================================
+   Animation Utilities - Staggered reveals
+   ============================================================================ */
+@layer utilities {
+    .animate-in {
+        animation: fade-in-up 0.5s ease-out forwards;
+        opacity: 0;
+    }
+
+    .animate-delay-100 {
+        animation-delay: 100ms;
+    }
+    .animate-delay-200 {
+        animation-delay: 200ms;
+    }
+    .animate-delay-300 {
+        animation-delay: 300ms;
+    }
+    .animate-delay-400 {
+        animation-delay: 400ms;
+    }
+    .animate-delay-500 {
+        animation-delay: 500ms;
+    }
+    .animate-delay-600 {
+        animation-delay: 600ms;
+    }
+    .animate-delay-700 {
+        animation-delay: 700ms;
+    }
+    .animate-delay-800 {
+        animation-delay: 800ms;
+    }
+
+    .animate-slide-in {
+        animation: slide-in-left 0.4s ease-out forwards;
+        opacity: 0;
+    }
+
+    .animate-scale-in {
+        animation: scale-in 0.3s ease-out forwards;
+        opacity: 0;
+    }
+
+    /* Hover lift effect */
+    .hover-lift {
+        transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+
+    .hover-lift:hover {
+        transform: translateY(-2px);
+        box-shadow:
+            0 8px 25px -5px rgb(0 0 0 / 0.1),
+            0 4px 10px -6px rgb(0 0 0 / 0.1);
+    }
+
+    .dark .hover-lift:hover {
+        box-shadow:
+            0 8px 25px -5px rgb(0 0 0 / 0.3),
+            0 4px 10px -6px rgb(0 0 0 / 0.2);
+    }
+}
+
+/* ============================================================================
+   Background Patterns & Effects
+   ============================================================================ */
+@layer utilities {
+    /* Subtle grid pattern */
+    .bg-grid {
+        background-image:
+            linear-gradient(
+                to right,
+                hsl(var(--border) / 0.5) 1px,
+                transparent 1px
+            ),
+            linear-gradient(
+                to bottom,
+                hsl(var(--border) / 0.5) 1px,
+                transparent 1px
+            );
+        background-size: 24px 24px;
+    }
+
+    .dark .bg-grid {
+        background-image:
+            linear-gradient(
+                to right,
+                hsl(var(--border) / 0.3) 1px,
+                transparent 1px
+            ),
+            linear-gradient(
+                to bottom,
+                hsl(var(--border) / 0.3) 1px,
+                transparent 1px
+            );
+    }
+
+    /* Dot pattern */
+    .bg-dots {
+        background-image: radial-gradient(
+            hsl(var(--border)) 1px,
+            transparent 1px
+        );
+        background-size: 16px 16px;
+    }
+
+    /* Noise texture overlay */
+    .bg-noise {
+        position: relative;
+    }
+
+    .bg-noise::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+        opacity: 0.02;
+        pointer-events: none;
+        mix-blend-mode: overlay;
+    }
+
+    .dark .bg-noise::before {
+        opacity: 0.03;
+    }
+
+    /* Gradient overlays */
+    .bg-gradient-subtle {
+        background: linear-gradient(
+            180deg,
+            hsl(var(--background)) 0%,
+            hsl(var(--muted) / 0.3) 100%
+        );
+    }
+
+    .bg-gradient-radial {
+        background: radial-gradient(
+            ellipse at top,
+            hsl(var(--muted) / 0.5) 0%,
+            transparent 50%
+        );
+    }
+}
+
+/* ============================================================================
+   Card Accent Utilities
+   ============================================================================ */
+@layer utilities {
+    .card-accent-emerald {
+        border-left: 3px solid hsl(142 76% 36%);
+    }
+
+    .card-accent-blue {
+        border-left: 3px solid hsl(214 100% 50%);
+    }
+
+    .card-accent-amber {
+        border-left: 3px solid hsl(38 92% 50%);
+    }
+
+    .card-accent-rose {
+        border-left: 3px solid hsl(0 84% 60%);
+    }
+
+    .card-accent-violet {
+        border-left: 3px solid hsl(262 83% 58%);
+    }
+
+    .card-accent-cyan {
+        border-left: 3px solid hsl(186 100% 42%);
+    }
+}
+
+/* ============================================================================
+   Status Badge Colors - Consistent across the app
+   ============================================================================ */
+@layer utilities {
+    /* Success states (active, present, approved, completed) */
+    .status-success {
+        background-color: hsl(var(--status-success-bg));
+        color: hsl(var(--status-success));
+        border: 1px solid hsl(var(--status-success) / 0.2);
+    }
+
+    /* Warning states (pending, late, on_probation) */
+    .status-warning {
+        background-color: hsl(var(--status-warning-bg));
+        color: hsl(var(--status-warning));
+        border: 1px solid hsl(var(--status-warning) / 0.2);
+    }
+
+    /* Error states (suspended, rejected, failed, absent) */
+    .status-error {
+        background-color: hsl(var(--status-error-bg));
+        color: hsl(var(--status-error));
+        border: 1px solid hsl(var(--status-error) / 0.2);
+    }
+
+    /* Info states (on_leave, initiated, in_progress) */
+    .status-info {
+        background-color: hsl(var(--status-info-bg));
+        color: hsl(var(--status-info));
+        border: 1px solid hsl(var(--status-info) / 0.2);
+    }
+
+    /* Neutral states (cancelled, unknown) */
+    .status-neutral {
+        background-color: hsl(var(--muted));
+        color: hsl(var(--muted-foreground));
+        border: 1px solid hsl(var(--border));
+    }
+}
+
+/* ============================================================================
+   Data Table Enhancements
+   ============================================================================ */
+@layer components {
+    .data-table {
+        font-size: 0.875rem;
+    }
+
+    .data-table th {
+        font-weight: 500;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        color: hsl(var(--muted-foreground));
+    }
+
+    .data-table tr {
+        transition: background-color 0.15s ease;
+    }
+
+    .data-table tr:hover {
+        background-color: hsl(var(--muted) / 0.5);
+    }
+
+    .data-table td {
+        vertical-align: middle;
+    }
+}
+
+/* ============================================================================
+   Page Header Component
+   ============================================================================ */
+@layer components {
+    .page-header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .page-header h1 {
+        font-family: var(--font-sans);
+        font-weight: 700;
+        font-size: 1.875rem;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+    }
+
+    .page-header p {
+        color: hsl(var(--muted-foreground));
+        font-size: 0.9375rem;
+    }
+
+    @media (min-width: 768px) {
+        .page-header h1 {
+            font-size: 2.25rem;
+        }
+    }
+}
+
+/* ============================================================================
+   View Transitions (for smooth theme switching)
+   ============================================================================ */
 ::view-transition-old(root),
 ::view-transition-new(root) {
     animation: none;
     mix-blend-mode: normal;
+}
+
+/* ============================================================================
+   Scrollbar Styling
+   ============================================================================ */
+@layer base {
+    /* Custom scrollbar for webkit browsers */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: hsl(var(--border));
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: hsl(var(--muted-foreground) / 0.5);
+    }
+
+    .dark ::-webkit-scrollbar-thumb {
+        background: hsl(var(--border));
+    }
+
+    .dark ::-webkit-scrollbar-thumb:hover {
+        background: hsl(var(--muted-foreground) / 0.4);
+    }
+}
+
+/* ============================================================================
+   Print Styles
+   ============================================================================ */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    body {
+        background: white;
+        color: black;
+    }
+
+    .page-break {
+        page-break-before: always;
+    }
 }

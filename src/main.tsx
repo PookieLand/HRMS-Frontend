@@ -25,12 +25,14 @@ import RouterErrorComponent from "./components/router-error.tsx";
 import SignUpPage from "./pages/signup.tsx";
 import Dashboard from "./pages/dashboard/dashboard.tsx";
 import UsersPage from "./pages/dashboard/users/index.tsx";
-import OnboardPage from "./pages/dashboard/users/onboard.tsx";
+import OnboardPageOld from "./pages/dashboard/users/onboard.tsx";
 import EmployeeSignupPage from "./pages/employee-signup.tsx";
 import EmployeesDirectory from "./pages/dashboard/employees/index.tsx";
 import EmployeeDetail from "./pages/dashboard/employees/[id].tsx";
 import TeamsView from "./pages/dashboard/employees/teams.tsx";
 import EmployeeReports from "./pages/dashboard/employees/reports.tsx";
+import EmployeeOnboardPage from "./pages/dashboard/employees/onboard.tsx";
+import OnboardingStatusPage from "./pages/dashboard/employees/onboarding.tsx";
 import AttendancePage from "./pages/dashboard/attendance/index.tsx";
 import TeamAttendancePage from "./pages/dashboard/attendance/team.tsx";
 import LeavePage from "./pages/dashboard/leave/index.tsx";
@@ -137,6 +139,7 @@ const dashboardRoute = createRoute({
   },
 });
 
+// Legacy user routes (kept for backwards compatibility)
 const usersRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/dashboard/users",
@@ -147,23 +150,24 @@ const usersRoute = createRoute({
   },
 });
 
-const onboardRoute = createRoute({
+const onboardRouteOld = createRoute({
   getParentRoute: () => rootRoute,
   path: "/dashboard/users/onboard",
-  component: OnboardPage,
+  component: OnboardPageOld,
   errorComponent: RouterErrorComponent,
   beforeLoad: () => {
     document.title = "Onboard Employee - HRMS";
   },
 });
 
+// Employee routes
 const employeesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/dashboard/employees",
   component: EmployeesDirectory,
   errorComponent: RouterErrorComponent,
   beforeLoad: () => {
-    document.title = "Employee Directory - HRMS";
+    document.title = "Employees - HRMS";
   },
 });
 
@@ -174,6 +178,28 @@ const employeeDetailRoute = createRoute({
   errorComponent: RouterErrorComponent,
   beforeLoad: () => {
     document.title = "Employee Details - HRMS";
+  },
+});
+
+// New employee onboard route (under employees section)
+const employeeOnboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard/employees/onboard",
+  component: EmployeeOnboardPage,
+  errorComponent: RouterErrorComponent,
+  beforeLoad: () => {
+    document.title = "Onboard Employee - HRMS";
+  },
+});
+
+// New onboarding status route (under employees section)
+const onboardingStatusRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard/employees/onboarding",
+  component: OnboardingStatusPage,
+  errorComponent: RouterErrorComponent,
+  beforeLoad: () => {
+    document.title = "Onboarding Status - HRMS";
   },
 });
 
@@ -243,7 +269,7 @@ const auditRoute = createRoute({
   component: AuditPage,
   errorComponent: RouterErrorComponent,
   beforeLoad: () => {
-    document.title = "Audit Service - HRMS";
+    document.title = "Audit Logs - HRMS";
   },
 });
 
@@ -267,16 +293,23 @@ const routeTree = rootRoute.addChildren([
   signupRoute,
   employeeSignupRoute,
   dashboardRoute,
+  // Legacy user routes
   usersRoute,
-  onboardRoute,
+  onboardRouteOld,
+  // Employee routes
   employeesRoute,
   employeeDetailRoute,
+  employeeOnboardRoute,
+  onboardingStatusRoute,
   teamsRoute,
   employeeReportsRoute,
+  // Attendance routes
   attendanceRoute,
   teamAttendanceRoute,
+  // Leave routes
   leaveRoute,
   leaveApprovalsRoute,
+  // Governance routes
   auditRoute,
   complianceRoute,
 ]);

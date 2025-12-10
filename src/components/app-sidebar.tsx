@@ -7,13 +7,13 @@ import {
   Building2,
   CalendarDays,
   Home,
-  LifeBuoy,
-  Send,
   Settings,
   Users,
   Clock,
-  BarChart3,
   Shield,
+  UserPlus,
+  BarChart3,
+  Network,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -96,8 +96,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     avatar: user?.profilePicture || user?.picture || "",
   };
 
-  // Check if user can manage users
-  const canManageUsers =
+  // Role-based access checks
+  const canManageEmployees =
     currentRole === "HR_Admin" || currentRole === "HR_Manager";
 
   const canManageTeam =
@@ -110,53 +110,81 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     currentRole === "HR_Manager" ||
     currentRole === "manager";
 
+  // Get role display name
+  const getRoleDisplayName = () => {
+    switch (currentRole) {
+      case "HR_Admin":
+        return "Administrator";
+      case "HR_Manager":
+        return "HR Manager";
+      case "manager":
+        return "Manager";
+      default:
+        return "Employee";
+    }
+  };
+
   const data = {
     navMain: [
+      // Dashboard - visible to all
       {
         title: "Dashboard",
         url: "/dashboard",
         icon: Home,
         isActive: true,
       },
-      // User Management - only for HR roles
-      ...(canManageUsers
-        ? [
-            {
-              title: "User Management",
-              url: "/dashboard/users",
-              icon: Users,
-              items: [
-                {
-                  title: "All Users",
-                  url: "/dashboard/users",
-                },
-                {
-                  title: "Onboard Employee",
-                  url: "/dashboard/users/onboard",
-                },
-              ],
-            },
-          ]
-        : []),
+
+      // Employees Section - Merged User Management + Employee Management
+      // For HR roles: full access including onboarding
+      // For managers: limited to directory and team views
+      // For employees: only directory view
       {
         title: "Employees",
         url: "/dashboard/employees",
         icon: Users,
         items: [
           {
-            title: "Employee Directory",
+            title: "All Employees",
             url: "/dashboard/employees",
           },
-          {
-            title: "Teams & Hierarchy",
-            url: "/dashboard/employees/teams",
-          },
-          {
-            title: "Reports & Analytics",
-            url: "/dashboard/employees/reports",
-          },
+          // Onboarding - only for HR roles
+          ...(canManageEmployees
+            ? [
+                {
+                  title: "Onboard Employee",
+                  url: "/dashboard/employees/onboard",
+                  icon: UserPlus,
+                },
+                {
+                  title: "Onboarding Status",
+                  url: "/dashboard/employees/onboarding",
+                },
+              ]
+            : []),
+          // Teams & Hierarchy - for managers and above
+          ...(canManageTeam
+            ? [
+                {
+                  title: "Teams & Hierarchy",
+                  url: "/dashboard/employees/teams",
+                  icon: Network,
+                },
+              ]
+            : []),
+          // Reports - for HR roles only
+          ...(canManageEmployees
+            ? [
+                {
+                  title: "Reports & Analytics",
+                  url: "/dashboard/employees/reports",
+                  icon: BarChart3,
+                },
+              ]
+            : []),
         ],
       },
+
+      // Attendance Section
       {
         title: "Attendance",
         url: "/dashboard/attendance",
@@ -176,6 +204,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             : []),
         ],
       },
+
+      // Leave Management Section
       {
         title: "Leave Management",
         url: "/dashboard/leave",
@@ -196,7 +226,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ],
       },
 
-      // Governance - only for authorized roles
+      // Governance Section - Audit & Compliance
       ...(canViewGovernance
         ? [
             {
@@ -205,17 +235,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               icon: Shield,
               items: [
                 {
-                  title: "Audit Service",
+                  title: "Audit Logs",
                   url: "/dashboard/governance/audit",
                 },
-                {
-                  title: "Compliance",
-                  url: "/dashboard/governance/compliance",
-                },
+                ...(currentRole === "HR_Admin" || currentRole === "HR_Manager"
+                  ? [
+                      {
+                        title: "Compliance",
+                        url: "/dashboard/governance/compliance",
+                      },
+                    ]
+                  : []),
               ],
             },
           ]
         : []),
+
+      // Settings - visible to all
       {
         title: "Settings",
         url: "#",
@@ -250,14 +286,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Building2 className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">HRMS</span>
-                  {canManageUsers && (
-                    <span className="truncate text-xs text-muted-foreground">
-                      {currentRole === "HR_Admin"
-                        ? "Administrator"
-                        : "HR Manager"}
-                    </span>
-                  )}
+                  <span className="truncate font-semibold tracking-tight">
+                    HRMS
+                  </span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    {getRoleDisplayName()}
+                  </span>
                 </div>
               </Link>
             </SidebarMenuButton>

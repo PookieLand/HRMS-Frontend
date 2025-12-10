@@ -1,19 +1,42 @@
+// Audit Logs Page
+// View and search audit events for the organization
+// Access based on role: HR_Admin sees all, HR_Manager sees below, Manager sees employees
+
 import { useEffect, useState } from "react";
 import { useAsgardeo } from "@asgardeo/react";
-import { AppSidebar } from "@/components/app-sidebar";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import {
   Shield,
   Search,
   Filter,
   Download,
-  User,
   Activity,
   Clock,
   AlertCircle,
+  CheckCircle2,
+  XCircle,
+  RefreshCw,
+  User,
+  FileText,
+  Settings,
+  Eye,
 } from "lucide-react";
+
+import {
+  DashboardLayout,
+  PageHeader,
+  PageContent,
+  PageSection,
+} from "@/components/dashboard-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -22,15 +45,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { format } from "date-fns";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+import { format, formatDistanceToNow, parseISO } from "date-fns";
 
 type UserRole = "HR_Admin" | "HR_Manager" | "manager" | "employee";
 
@@ -47,15 +77,54 @@ interface AuditEvent {
   metadata?: Record<string, unknown>;
 }
 
+// Status badge styling
+function getStatusBadgeClass(status: string): string {
+  switch (status) {
+    case "success":
+      return "status-success";
+    case "failed":
+      return "status-error";
+    case "warning":
+      return "status-warning";
+    default:
+      return "status-neutral";
+  }
+}
+
+// Action icon mapping
+function getActionIcon(action: string) {
+  if (action.includes("login") || action.includes("auth")) {
+    return <Shield className="size-4" />;
+  }
+  if (action.includes("create") || action.includes("add")) {
+    return <FileText className="size-4" />;
+  }
+  if (action.includes("update") || action.includes("edit")) {
+    return <Settings className="size-4" />;
+  }
+  if (action.includes("delete") || action.includes("remove")) {
+    return <XCircle className="size-4" />;
+  }
+  if (action.includes("view") || action.includes("read")) {
+    return <Eye className="size-4" />;
+  }
+  return <Activity className="size-4" />;
+}
+
 export default function AuditPage() {
   const { getDecodedIdToken } = useAsgardeo();
+
+  // State
   const [currentRole, setCurrentRole] = useState<UserRole>("employee");
   const [auditEvents, setAuditEvents] = useState<AuditEvent[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<AuditEvent[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Filters
   const [searchQuery, setSearchQuery] = useState("");
   const [filterAction, setFilterAction] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [isLoading, setIsLoading] = useState(true);
 
   // Determine user role
   useEffect(() => {
@@ -93,71 +162,100 @@ export default function AuditPage() {
     determineRole();
   }, [getDecodedIdToken]);
 
-  // Mock data - replace with API call
+  // Load audit events (mock data for now)
   useEffect(() => {
-    const mockEvents: AuditEvent[] = [
-      {
-        id: "1",
-        timestamp: new Date().toISOString(),
-        user_id: "user_001",
-        user_name: "John Smith",
-        action: "user_login",
-        resource: "authentication",
-        status: "success",
-        ip_address: "192.168.1.100",
-        details: "User successfully logged in",
-      },
-      {
-        id: "2",
-        timestamp: new Date(Date.now() - 3600000).toISOString(),
-        user_id: "user_002",
-        user_name: "Sarah Johnson",
-        action: "employee_update",
-        resource: "employee_management",
-        status: "success",
-        ip_address: "192.168.1.101",
-        details: "Updated employee salary information",
-      },
-      {
-        id: "3",
-        timestamp: new Date(Date.now() - 7200000).toISOString(),
-        user_id: "user_003",
-        user_name: "Mike Wilson",
-        action: "leave_approval",
-        resource: "leave_management",
-        status: "success",
-        ip_address: "192.168.1.102",
-        details: "Approved leave request for employee #EMP-445",
-      },
-      {
-        id: "4",
-        timestamp: new Date(Date.now() - 10800000).toISOString(),
-        user_id: "user_004",
-        user_name: "Emily Davis",
-        action: "failed_login",
-        resource: "authentication",
-        status: "failed",
-        ip_address: "192.168.1.103",
-        details: "Failed login attempt - invalid credentials",
-      },
-      {
-        id: "5",
-        timestamp: new Date(Date.now() - 14400000).toISOString(),
-        user_id: "user_005",
-        user_name: "Robert Brown",
-        action: "user_creation",
-        resource: "user_management",
-        status: "success",
-        ip_address: "192.168.1.104",
-        details: "Created new employee account",
-      },
-    ];
+    const loadAuditEvents = async () => {
+      setIsLoading(true);
 
-    setTimeout(() => {
-      setAuditEvents(mockEvents);
-      setFilteredEvents(mockEvents);
-      setIsLoading(false);
-    }, 1000);
+      // Mock data - replace with actual API call
+      const mockEvents: AuditEvent[] = [
+        {
+          id: "1",
+          timestamp: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
+          user_id: "user_001",
+          user_name: "John Smith",
+          action: "user.login",
+          resource: "Authentication",
+          status: "success",
+          ip_address: "192.168.1.100",
+          details: "Successful login from Chrome browser",
+        },
+        {
+          id: "2",
+          timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+          user_id: "user_002",
+          user_name: "Jane Doe",
+          action: "employee.create",
+          resource: "Employee Management",
+          status: "success",
+          ip_address: "192.168.1.101",
+          details: "Created new employee record for Alex Johnson",
+        },
+        {
+          id: "3",
+          timestamp: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
+          user_id: "user_003",
+          user_name: "Mike Wilson",
+          action: "leave.approve",
+          resource: "Leave Management",
+          status: "success",
+          ip_address: "192.168.1.102",
+          details: "Approved annual leave request for Sarah Brown",
+        },
+        {
+          id: "4",
+          timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
+          user_id: "user_001",
+          user_name: "John Smith",
+          action: "user.update",
+          resource: "User Management",
+          status: "warning",
+          ip_address: "192.168.1.100",
+          details: "Updated user permissions - elevated access granted",
+        },
+        {
+          id: "5",
+          timestamp: new Date(Date.now() - 1000 * 60 * 180).toISOString(),
+          user_id: "user_004",
+          user_name: "Emily Chen",
+          action: "user.login",
+          resource: "Authentication",
+          status: "failed",
+          ip_address: "192.168.1.105",
+          details: "Failed login attempt - invalid password",
+        },
+        {
+          id: "6",
+          timestamp: new Date(Date.now() - 1000 * 60 * 240).toISOString(),
+          user_id: "user_002",
+          user_name: "Jane Doe",
+          action: "report.view",
+          resource: "Reports",
+          status: "success",
+          ip_address: "192.168.1.101",
+          details: "Viewed salary summary report",
+        },
+        {
+          id: "7",
+          timestamp: new Date(Date.now() - 1000 * 60 * 300).toISOString(),
+          user_id: "user_005",
+          user_name: "Robert Taylor",
+          action: "attendance.checkin",
+          resource: "Attendance",
+          status: "success",
+          ip_address: "192.168.1.110",
+          details: "Employee checked in at 9:05 AM",
+        },
+      ];
+
+      setTimeout(() => {
+        setAuditEvents(mockEvents);
+        setFilteredEvents(mockEvents);
+        setIsLoading(false);
+      }, 800);
+    };
+
+    loadAuditEvents();
   }, []);
 
   // Filter events based on search and filters
@@ -165,16 +263,20 @@ export default function AuditPage() {
     let filtered = auditEvents;
 
     if (searchQuery) {
+      const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
         (event) =>
-          event.user_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          event.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          event.details.toLowerCase().includes(searchQuery.toLowerCase()),
+          event.user_name.toLowerCase().includes(query) ||
+          event.action.toLowerCase().includes(query) ||
+          event.details.toLowerCase().includes(query) ||
+          event.resource.toLowerCase().includes(query),
       );
     }
 
     if (filterAction !== "all") {
-      filtered = filtered.filter((event) => event.action === filterAction);
+      filtered = filtered.filter((event) =>
+        event.action.toLowerCase().includes(filterAction),
+      );
     }
 
     if (filterStatus !== "all") {
@@ -184,24 +286,20 @@ export default function AuditPage() {
     setFilteredEvents(filtered);
   }, [searchQuery, filterAction, filterStatus, auditEvents]);
 
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case "success":
-        return "default";
-      case "failed":
-        return "destructive";
-      case "warning":
-        return "secondary";
-      default:
-        return "outline";
-    }
+  // Refresh data
+  const handleRefresh = () => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1000);
   };
 
-  const getActionIcon = (action: string) => {
-    if (action.includes("login")) return <Shield className="size-4" />;
-    if (action.includes("update") || action.includes("create"))
-      return <Activity className="size-4" />;
-    return <AlertCircle className="size-4" />;
+  // Stats
+  const stats = {
+    total: auditEvents.length,
+    success: auditEvents.filter((e) => e.status === "success").length,
+    failed: auditEvents.filter((e) => e.status === "failed").length,
+    warning: auditEvents.filter((e) => e.status === "warning").length,
   };
 
   // Check if user has access to audit logs
@@ -212,257 +310,293 @@ export default function AuditPage() {
 
   if (!hasAuditAccess) {
     return (
-      <SidebarProvider>
-        <AppSidebar />
-        <SidebarInset>
-          <div className="flex min-h-screen items-center justify-center p-8">
+      <DashboardLayout>
+        <PageHeader title="Audit Logs" icon={<Shield className="size-5" />} />
+        <PageContent>
+          <div className="flex flex-1 items-center justify-center py-16">
             <Card className="max-w-md">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <AlertCircle className="size-5 text-destructive" />
-                  Access Denied
-                </CardTitle>
+              <CardHeader className="text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
+                  <AlertCircle className="h-8 w-8 text-destructive" />
+                </div>
+                <CardTitle>Access Denied</CardTitle>
                 <CardDescription>
-                  You do not have permission to view audit logs.
+                  You do not have permission to view audit logs. Only HR Admin,
+                  HR Manager, and Manager roles can access this page.
                 </CardDescription>
               </CardHeader>
             </Card>
           </div>
-        </SidebarInset>
-      </SidebarProvider>
+        </PageContent>
+      </DashboardLayout>
     );
   }
 
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <div className="flex flex-col min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
-          {/* Header */}
-          <header className="sticky top-0 z-10 backdrop-blur-md bg-background/80 border-b">
-            <div className="flex h-16 items-center gap-4 px-6">
-              <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/20">
-                  <Shield className="size-5 text-white" />
+    <DashboardLayout>
+      <PageHeader
+        title="Audit Logs"
+        description="Monitor system activity and security events"
+        icon={<Shield className="size-5" />}
+      >
+        <div className="flex items-center gap-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleRefresh}
+                  disabled={refreshing}
+                >
+                  <RefreshCw
+                    className={`size-4 ${refreshing ? "animate-spin" : ""}`}
+                  />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Refresh logs</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <Button variant="outline" className="gap-2">
+            <Download className="size-4" />
+            <span className="hidden sm:inline">Export</span>
+          </Button>
+        </div>
+      </PageHeader>
+
+      <PageContent>
+        {/* Stats Cards */}
+        <PageSection delay={1}>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="card-accent-blue hover-lift">
+              <CardHeader className="pb-2">
+                <CardDescription className="text-xs uppercase tracking-wider">
+                  Total Events
+                </CardDescription>
+                <CardTitle className="text-3xl tabular-nums">
+                  {isLoading ? <Skeleton className="h-9 w-16" /> : stats.total}
+                </CardTitle>
+              </CardHeader>
+            </Card>
+
+            <Card className="card-accent-emerald hover-lift">
+              <CardHeader className="pb-2">
+                <CardDescription className="flex items-center gap-2 text-xs uppercase tracking-wider">
+                  <CheckCircle2 className="size-4 text-emerald-600" />
+                  Successful
+                </CardDescription>
+                <CardTitle className="text-3xl tabular-nums">
+                  {isLoading ? (
+                    <Skeleton className="h-9 w-16" />
+                  ) : (
+                    stats.success
+                  )}
+                </CardTitle>
+              </CardHeader>
+            </Card>
+
+            <Card className="card-accent-amber hover-lift">
+              <CardHeader className="pb-2">
+                <CardDescription className="flex items-center gap-2 text-xs uppercase tracking-wider">
+                  <AlertCircle className="size-4 text-amber-600" />
+                  Warnings
+                </CardDescription>
+                <CardTitle className="text-3xl tabular-nums">
+                  {isLoading ? (
+                    <Skeleton className="h-9 w-16" />
+                  ) : (
+                    stats.warning
+                  )}
+                </CardTitle>
+              </CardHeader>
+            </Card>
+
+            <Card className="card-accent-rose hover-lift">
+              <CardHeader className="pb-2">
+                <CardDescription className="flex items-center gap-2 text-xs uppercase tracking-wider">
+                  <XCircle className="size-4 text-rose-600" />
+                  Failed
+                </CardDescription>
+                <CardTitle className="text-3xl tabular-nums">
+                  {isLoading ? <Skeleton className="h-9 w-16" /> : stats.failed}
+                </CardTitle>
+              </CardHeader>
+            </Card>
+          </div>
+        </PageSection>
+
+        {/* Filters */}
+        <PageSection delay={2}>
+          <Card>
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-2">
+                <Filter className="size-4 text-muted-foreground" />
+                <CardTitle className="text-base">Filters</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Search */}
+                <div className="lg:col-span-2 relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by user, action, or details..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9"
+                  />
                 </div>
-                <div>
-                  <h1 className="text-xl font-bold tracking-tight">
-                    Audit Trail
-                  </h1>
-                  <p className="text-xs text-muted-foreground">
-                    System activity monitoring & compliance
+
+                {/* Action Filter */}
+                <Select value={filterAction} onValueChange={setFilterAction}>
+                  <SelectTrigger>
+                    <Activity className="size-4 mr-2 text-muted-foreground" />
+                    <SelectValue placeholder="Action type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Actions</SelectItem>
+                    <SelectItem value="login">Login</SelectItem>
+                    <SelectItem value="create">Create</SelectItem>
+                    <SelectItem value="update">Update</SelectItem>
+                    <SelectItem value="delete">Delete</SelectItem>
+                    <SelectItem value="view">View</SelectItem>
+                    <SelectItem value="approve">Approve</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {/* Status Filter */}
+                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="success">Success</SelectItem>
+                    <SelectItem value="warning">Warning</SelectItem>
+                    <SelectItem value="failed">Failed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+        </PageSection>
+
+        {/* Audit Events Table */}
+        <PageSection delay={3}>
+          <Card>
+            <CardContent className="p-0">
+              {isLoading ? (
+                <div className="p-6 space-y-4">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="flex items-center gap-4">
+                      <Skeleton className="size-8 rounded-full" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-4 w-48" />
+                        <Skeleton className="h-3 w-32" />
+                      </div>
+                      <Skeleton className="h-6 w-20" />
+                    </div>
+                  ))}
+                </div>
+              ) : filteredEvents.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <div className="size-12 rounded-full bg-muted flex items-center justify-center mb-4">
+                    <Shield className="size-6 text-muted-foreground" />
+                  </div>
+                  <p className="font-medium mb-1">No audit events found</p>
+                  <p className="text-sm text-muted-foreground">
+                    Try adjusting your search or filters
                   </p>
                 </div>
-              </div>
-              <div className="ml-auto flex items-center gap-2">
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Download className="size-4" />
-                  Export
-                </Button>
-              </div>
-            </div>
-          </header>
-
-          {/* Main Content */}
-          <main className="flex-1 p-6 space-y-6">
-            {/* Stats Cards */}
-            <div className="grid gap-4 md:grid-cols-4">
-              <Card className="border-l-4 border-l-green-500">
-                <CardHeader className="pb-3">
-                  <CardDescription className="text-xs">
-                    Total Events
-                  </CardDescription>
-                  <CardTitle className="text-2xl font-bold">
-                    {auditEvents.length}
-                  </CardTitle>
-                </CardHeader>
-              </Card>
-              <Card className="border-l-4 border-l-blue-500">
-                <CardHeader className="pb-3">
-                  <CardDescription className="text-xs">
-                    Success Rate
-                  </CardDescription>
-                  <CardTitle className="text-2xl font-bold">
-                    {(
-                      (auditEvents.filter((e) => e.status === "success")
-                        .length /
-                        auditEvents.length) *
-                      100
-                    ).toFixed(0)}
-                    %
-                  </CardTitle>
-                </CardHeader>
-              </Card>
-              <Card className="border-l-4 border-l-red-500">
-                <CardHeader className="pb-3">
-                  <CardDescription className="text-xs">Failed</CardDescription>
-                  <CardTitle className="text-2xl font-bold">
-                    {auditEvents.filter((e) => e.status === "failed").length}
-                  </CardTitle>
-                </CardHeader>
-              </Card>
-              <Card className="border-l-4 border-l-purple-500">
-                <CardHeader className="pb-3">
-                  <CardDescription className="text-xs">
-                    Last 24h
-                  </CardDescription>
-                  <CardTitle className="text-2xl font-bold">
-                    {auditEvents.length}
-                  </CardTitle>
-                </CardHeader>
-              </Card>
-            </div>
-
-            {/* Filters */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base font-semibold">
-                  Filters & Search
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 md:grid-cols-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search events..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-9"
-                    />
-                  </div>
-                  <Select value={filterAction} onValueChange={setFilterAction}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Action" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Actions</SelectItem>
-                      <SelectItem value="user_login">Login</SelectItem>
-                      <SelectItem value="employee_update">Update</SelectItem>
-                      <SelectItem value="leave_approval">
-                        Leave Approval
-                      </SelectItem>
-                      <SelectItem value="user_creation">
-                        User Creation
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={filterStatus} onValueChange={setFilterStatus}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Status</SelectItem>
-                      <SelectItem value="success">Success</SelectItem>
-                      <SelectItem value="failed">Failed</SelectItem>
-                      <SelectItem value="warning">Warning</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setSearchQuery("");
-                      setFilterAction("all");
-                      setFilterStatus("all");
-                    }}
-                  >
-                    <Filter className="size-4 mr-2" />
-                    Clear
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Events List */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base font-semibold">
-                  Recent Activity
-                </CardTitle>
-                <CardDescription>
-                  Showing {filteredEvents.length} of {auditEvents.length} events
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="text-center space-y-2">
-                      <div className="size-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-                      <p className="text-sm text-muted-foreground">
-                        Loading audit events...
-                      </p>
-                    </div>
-                  </div>
-                ) : filteredEvents.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <AlertCircle className="size-12 text-muted-foreground mb-4" />
-                    <p className="text-sm text-muted-foreground">
-                      No audit events found
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {filteredEvents.map((event, index) => (
-                      <div
-                        key={event.id}
-                        className="p-4 rounded-lg border bg-card hover:bg-accent/50 transition-all duration-200 animate-in fade-in slide-in-from-bottom-2"
-                        style={{ animationDelay: `${index * 50}ms` }}
-                      >
-                        <div className="flex items-start gap-4">
-                          <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
-                            {getActionIcon(event.action)}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-4 mb-2">
-                              <div>
-                                <h3 className="font-semibold text-sm">
-                                  {event.action
-                                    .split("_")
-                                    .map(
-                                      (w) =>
-                                        w.charAt(0).toUpperCase() + w.slice(1),
-                                    )
-                                    .join(" ")}
-                                </h3>
-                                <p className="text-sm text-muted-foreground">
-                                  {event.details}
-                                </p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table className="data-table">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[180px]">Timestamp</TableHead>
+                        <TableHead>User</TableHead>
+                        <TableHead>Action</TableHead>
+                        <TableHead>Resource</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="max-w-[250px]">Details</TableHead>
+                        <TableHead>IP Address</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredEvents.map((event, index) => (
+                        <TableRow
+                          key={event.id}
+                          className="animate-in"
+                          style={{ animationDelay: `${index * 30}ms` }}
+                        >
+                          <TableCell>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger className="text-left">
+                                  <div className="flex items-center gap-2">
+                                    <Clock className="size-3 text-muted-foreground" />
+                                    <span className="text-sm">
+                                      {formatDistanceToNow(
+                                        parseISO(event.timestamp),
+                                        { addSuffix: true },
+                                      )}
+                                    </span>
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  {format(parseISO(event.timestamp), "PPpp")}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <div className="size-7 rounded-full bg-muted flex items-center justify-center">
+                                <User className="size-4 text-muted-foreground" />
                               </div>
-                              <Badge
-                                variant={getStatusBadgeVariant(event.status)}
-                              >
-                                {event.status}
-                              </Badge>
-                            </div>
-                            <Separator className="my-2" />
-                            <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                              <div className="flex items-center gap-1">
-                                <User className="size-3" />
+                              <span className="font-medium">
                                 {event.user_name}
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Clock className="size-3" />
-                                {format(
-                                  new Date(event.timestamp),
-                                  "MMM dd, yyyy HH:mm:ss",
-                                )}
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Activity className="size-3" />
-                                {event.ip_address}
-                              </div>
+                              </span>
                             </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </main>
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              {getActionIcon(event.action)}
+                              <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
+                                {event.action}
+                              </code>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {event.resource}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="outline"
+                              className={getStatusBadgeClass(event.status)}
+                            >
+                              {event.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="max-w-[250px] truncate text-sm text-muted-foreground">
+                            {event.details}
+                          </TableCell>
+                          <TableCell>
+                            <code className="text-xs text-muted-foreground">
+                              {event.ip_address}
+                            </code>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </PageSection>
+      </PageContent>
+    </DashboardLayout>
   );
 }
