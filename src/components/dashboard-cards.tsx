@@ -1,4 +1,11 @@
-import { IconTrendingDown, IconTrendingUp, IconUsers, IconCalendarCheck, IconCalendarOff, IconClock } from "@tabler/icons-react";
+import {
+  IconTrendingDown,
+  IconTrendingUp,
+  IconUsers,
+  IconCalendarCheck,
+  IconCalendarOff,
+  IconClock,
+} from "@tabler/icons-react";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -31,15 +38,14 @@ export function DashboardCards({ data, isLoading }: DashboardCardsProps) {
   const approvedLeaves = data?.leaveSummary?.approved_leaves ?? 0;
 
   // Calculate attendance rate
-  const attendanceRate = totalEmployees > 0
-    ? Math.round((checkedIn / totalEmployees) * 100)
-    : 0;
+  const attendanceRate =
+    totalEmployees > 0 ? Math.round((checkedIn / totalEmployees) * 100) : 0;
 
   // Determine if attendance is good (>= 90%)
   const isAttendanceGood = attendanceRate >= 90;
 
   return (
-    <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+    <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6">
       {/* Total Employees Card */}
       <Card className="@container/card">
         <CardHeader>
@@ -72,15 +78,23 @@ export function DashboardCards({ data, isLoading }: DashboardCardsProps) {
             {checkedIn} / {totalEmployees}
           </CardTitle>
           <CardAction>
-            <Badge variant={isAttendanceGood ? "outline" : "destructive"} className="gap-1">
-              {isAttendanceGood ? <IconTrendingUp className="size-3" /> : <IconTrendingDown className="size-3" />}
+            <Badge
+              variant={isAttendanceGood ? "outline" : "destructive"}
+              className="gap-1"
+            >
+              {isAttendanceGood ? (
+                <IconTrendingUp className="size-3" />
+              ) : (
+                <IconTrendingDown className="size-3" />
+              )}
               {attendanceRate}%
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            {present} present, {late} late <IconCalendarCheck className="size-4" />
+            {present} present, {late} late{" "}
+            <IconCalendarCheck className="size-4" />
           </div>
           <div className="text-muted-foreground">
             {notCheckedIn} not checked in yet
@@ -96,7 +110,10 @@ export function DashboardCards({ data, isLoading }: DashboardCardsProps) {
             {pendingLeaves}
           </CardTitle>
           <CardAction>
-            <Badge variant={pendingLeaves > 5 ? "destructive" : "outline"} className="gap-1">
+            <Badge
+              variant={pendingLeaves > 5 ? "destructive" : "outline"}
+              className="gap-1"
+            >
               <IconClock className="size-3" />
               {pendingLeaves > 0 ? "Action needed" : "All clear"}
             </Badge>
@@ -128,7 +145,8 @@ export function DashboardCards({ data, isLoading }: DashboardCardsProps) {
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            {approvedLeaves} approved, {data?.leaveSummary?.rejected_leaves ?? 0} rejected
+            {approvedLeaves} approved,{" "}
+            {data?.leaveSummary?.rejected_leaves ?? 0} rejected
           </div>
           <div className="text-muted-foreground">
             {data?.leaveSummary?.cancelled_leaves ?? 0} cancelled
@@ -141,7 +159,7 @@ export function DashboardCards({ data, isLoading }: DashboardCardsProps) {
 
 function DashboardCardsSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-4 lg:px-6">
       {[1, 2, 3, 4].map((i) => (
         <Card key={i} className="@container/card">
           <CardHeader>
