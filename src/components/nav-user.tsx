@@ -114,12 +114,7 @@ export function NavUser({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
+            <DropdownMenuGroup></DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
@@ -133,14 +128,6 @@ export function NavUser({
                   <Key />
                   JWT Token
                 </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

@@ -13,6 +13,7 @@ import {
   Users,
   Clock,
   BarChart3,
+  Shield,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -99,6 +100,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const canManageUsers =
     currentRole === "HR_Admin" || currentRole === "HR_Manager";
 
+  const canManageTeam =
+    currentRole === "HR_Admin" ||
+    currentRole === "HR_Manager" ||
+    currentRole === "manager";
+
+  const canViewGovernance =
+    currentRole === "HR_Admin" ||
+    currentRole === "HR_Manager" ||
+    currentRole === "manager";
+
   const data = {
     navMain: [
       {
@@ -129,84 +140,82 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         : []),
       {
         title: "Employees",
-        url: "#",
+        url: "/dashboard/employees",
         icon: Users,
         items: [
           {
-            title: "All Employees",
-            url: "#",
+            title: "Employee Directory",
+            url: "/dashboard/employees",
           },
           {
-            title: "Departments",
-            url: "#",
+            title: "Teams & Hierarchy",
+            url: "/dashboard/employees/teams",
           },
           {
-            title: "Positions",
-            url: "#",
+            title: "Reports & Analytics",
+            url: "/dashboard/employees/reports",
           },
         ],
       },
       {
         title: "Attendance",
-        url: "#",
+        url: "/dashboard/attendance",
         icon: Clock,
         items: [
           {
-            title: "Check In/Out",
-            url: "#",
-          },
-          {
             title: "My Attendance",
-            url: "#",
+            url: "/dashboard/attendance",
           },
-          {
-            title: "Attendance Reports",
-            url: "#",
-          },
+          ...(canManageTeam
+            ? [
+                {
+                  title: "Team Attendance",
+                  url: "/dashboard/attendance/team",
+                },
+              ]
+            : []),
         ],
       },
       {
         title: "Leave Management",
-        url: "#",
+        url: "/dashboard/leave",
         icon: CalendarDays,
         items: [
           {
-            title: "Request Leave",
-            url: "#",
-          },
-          {
             title: "My Leaves",
-            url: "#",
+            url: "/dashboard/leave",
           },
-          {
-            title: "Pending Approvals",
-            url: "#",
-          },
-          {
-            title: "Leave Calendar",
-            url: "#",
-          },
+          ...(canManageTeam
+            ? [
+                {
+                  title: "Pending Approvals",
+                  url: "/dashboard/leave/approvals",
+                },
+              ]
+            : []),
         ],
       },
-      {
-        title: "Reports",
-        url: "#",
-        icon: BarChart3,
-        items: [
-          {
-            title: "Attendance Report",
-            url: "#",
-          },
-          {
-            title: "Leave Report",
-            url: "#",
-          },
-          {
-            title: "Employee Report",
-            url: "#",
-          },
-        ],
-      },
+
+      // Governance - only for authorized roles
+      ...(canViewGovernance
+        ? [
+            {
+              title: "Governance",
+              url: "/dashboard/governance/audit",
+              icon: Shield,
+              items: [
+                {
+                  title: "Audit Service",
+                  url: "/dashboard/governance/audit",
+                },
+                {
+                  title: "Compliance",
+                  url: "/dashboard/governance/compliance",
+                },
+              ],
+            },
+          ]
+        : []),
       {
         title: "Settings",
         url: "#",
@@ -227,18 +236,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ],
       },
     ],
-    navSecondary: [
-      {
-        title: "Support",
-        url: "#",
-        icon: LifeBuoy,
-      },
-      {
-        title: "Feedback",
-        url: "#",
-        icon: Send,
-      },
-    ],
+    navSecondary: [],
   };
 
   return (

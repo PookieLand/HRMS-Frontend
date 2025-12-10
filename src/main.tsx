@@ -27,6 +27,16 @@ import Dashboard from "./pages/dashboard/dashboard.tsx";
 import UsersPage from "./pages/dashboard/users/index.tsx";
 import OnboardPage from "./pages/dashboard/users/onboard.tsx";
 import EmployeeSignupPage from "./pages/employee-signup.tsx";
+import EmployeesDirectory from "./pages/dashboard/employees/index.tsx";
+import EmployeeDetail from "./pages/dashboard/employees/[id].tsx";
+import TeamsView from "./pages/dashboard/employees/teams.tsx";
+import EmployeeReports from "./pages/dashboard/employees/reports.tsx";
+import AttendancePage from "./pages/dashboard/attendance/index.tsx";
+import TeamAttendancePage from "./pages/dashboard/attendance/team.tsx";
+import LeavePage from "./pages/dashboard/leave/index.tsx";
+import LeaveApprovalsPage from "./pages/dashboard/leave/approvals.tsx";
+import AuditPage from "./pages/dashboard/governance/audit.tsx";
+import CompliancePage from "./pages/dashboard/governance/compliance.tsx";
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -147,6 +157,106 @@ const onboardRoute = createRoute({
   },
 });
 
+const employeesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard/employees",
+  component: EmployeesDirectory,
+  errorComponent: RouterErrorComponent,
+  beforeLoad: () => {
+    document.title = "Employee Directory - HRMS";
+  },
+});
+
+const employeeDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard/employees/$id",
+  component: EmployeeDetail,
+  errorComponent: RouterErrorComponent,
+  beforeLoad: () => {
+    document.title = "Employee Details - HRMS";
+  },
+});
+
+const teamsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard/employees/teams",
+  component: TeamsView,
+  errorComponent: RouterErrorComponent,
+  beforeLoad: () => {
+    document.title = "Teams & Hierarchy - HRMS";
+  },
+});
+
+const employeeReportsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard/employees/reports",
+  component: EmployeeReports,
+  errorComponent: RouterErrorComponent,
+  beforeLoad: () => {
+    document.title = "Employee Reports - HRMS";
+  },
+});
+
+const attendanceRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard/attendance",
+  component: AttendancePage,
+  errorComponent: RouterErrorComponent,
+  beforeLoad: () => {
+    document.title = "My Attendance - HRMS";
+  },
+});
+
+const teamAttendanceRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard/attendance/team",
+  component: TeamAttendancePage,
+  errorComponent: RouterErrorComponent,
+  beforeLoad: () => {
+    document.title = "Team Attendance - HRMS";
+  },
+});
+
+const leaveRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard/leave",
+  component: LeavePage,
+  errorComponent: RouterErrorComponent,
+  beforeLoad: () => {
+    document.title = "My Leaves - HRMS";
+  },
+});
+
+const leaveApprovalsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard/leave/approvals",
+  component: LeaveApprovalsPage,
+  errorComponent: RouterErrorComponent,
+  beforeLoad: () => {
+    document.title = "Leave Approvals - HRMS";
+  },
+});
+
+const auditRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard/governance/audit",
+  component: AuditPage,
+  errorComponent: RouterErrorComponent,
+  beforeLoad: () => {
+    document.title = "Audit Service - HRMS";
+  },
+});
+
+const complianceRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard/governance/compliance",
+  component: CompliancePage,
+  errorComponent: RouterErrorComponent,
+  beforeLoad: () => {
+    document.title = "Compliance Center - HRMS";
+  },
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
@@ -159,6 +269,16 @@ const routeTree = rootRoute.addChildren([
   dashboardRoute,
   usersRoute,
   onboardRoute,
+  employeesRoute,
+  employeeDetailRoute,
+  teamsRoute,
+  employeeReportsRoute,
+  attendanceRoute,
+  teamAttendanceRoute,
+  leaveRoute,
+  leaveApprovalsRoute,
+  auditRoute,
+  complianceRoute,
 ]);
 
 const router = createRouter({
