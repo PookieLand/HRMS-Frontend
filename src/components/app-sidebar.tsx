@@ -7,7 +7,6 @@ import {
   Building2,
   CalendarDays,
   Home,
-  Settings,
   Users,
   Clock,
   Shield,
@@ -250,27 +249,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             },
           ]
         : []),
-
-      // Settings - visible to all
-      {
-        title: "Settings",
-        url: "#",
-        icon: Settings,
-        items: [
-          {
-            title: "General",
-            url: "#",
-          },
-          {
-            title: "Notifications",
-            url: "#",
-          },
-          {
-            title: "Security",
-            url: "#",
-          },
-        ],
-      },
     ],
     navSecondary: [],
   };

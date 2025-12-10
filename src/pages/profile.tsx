@@ -81,7 +81,9 @@ export default function ProfilePage() {
   }, []);
 
   // Fetch user information from decoded ID token and backend
-  const fetchUserData = useCallback(async () => {
+  // NOTE: useCallback was removed to avoid frequent identity changes causing repeated effects.
+  // We keep a plain async function and drive initial fetch from an effect that only depends on mount and sign-in state.
+  async function fetchUserData() {
     if (!isSignedIn) {
       setIsLoading(false);
       setAuthStatus("inactive");
@@ -156,12 +158,13 @@ export default function ProfilePage() {
     } finally {
       setIsLoading(false);
     }
-  }, [isSignedIn, getDecodedIdToken, getAccessToken]);
+  }
 
   useEffect(() => {
+    // Only trigger on initial mount and when sign-in state changes to avoid frequent re-runs
     if (!isMounted) return;
     fetchUserData();
-  }, [isMounted, fetchUserData]);
+  }, [isMounted, isSignedIn]);
 
   const handleInputChange = (field: string, value: string) => {
     setEditableFields((prev) => ({
