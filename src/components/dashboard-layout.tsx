@@ -33,8 +33,7 @@ export function DashboardLayout({ children, className }: DashboardLayoutProps) {
         <main
           className={cn(
             "flex flex-1 flex-col min-h-[calc(100vh-var(--header-height))]",
-            "bg-gradient-subtle",
-            className
+            className,
           )}
         >
           {children}
@@ -68,7 +67,7 @@ export function PageHeader({
         "flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between",
         "px-4 lg:px-6 py-6",
         "animate-in",
-        className
+        className,
       )}
     >
       <div className="space-y-1">
@@ -122,9 +121,7 @@ export function PageSection({
   delay = 0,
 }: PageSectionProps) {
   const delayClass =
-    delay > 0
-      ? `animate-delay-${Math.min(delay * 100, 800)}`
-      : "";
+    delay > 0 ? `animate-delay-${Math.min(delay * 100, 800)}` : "";
 
   return (
     <section

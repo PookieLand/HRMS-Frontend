@@ -45,9 +45,9 @@ export function DashboardCards({ data, isLoading }: DashboardCardsProps) {
   const isAttendanceGood = attendanceRate >= 90;
 
   return (
-    <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-4 lg:px-6">
       {/* Total Employees Card */}
-      <Card className="@container/card">
+      <Card className="@container/card hover-lift">
         <CardHeader>
           <CardDescription>Total Employees</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
@@ -71,7 +71,7 @@ export function DashboardCards({ data, isLoading }: DashboardCardsProps) {
       </Card>
 
       {/* Today's Attendance Card */}
-      <Card className="@container/card">
+      <Card className="@container/card hover-lift">
         <CardHeader>
           <CardDescription>Today's Attendance</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
@@ -103,7 +103,7 @@ export function DashboardCards({ data, isLoading }: DashboardCardsProps) {
       </Card>
 
       {/* Pending Leave Requests Card */}
-      <Card className="@container/card">
+      <Card className="@container/card hover-lift">
         <CardHeader>
           <CardDescription>Pending Leave Requests</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
@@ -130,7 +130,7 @@ export function DashboardCards({ data, isLoading }: DashboardCardsProps) {
       </Card>
 
       {/* Leave Statistics Card */}
-      <Card className="@container/card">
+      <Card className="@container/card hover-lift">
         <CardHeader>
           <CardDescription>Leave Statistics</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">

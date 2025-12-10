@@ -6,7 +6,7 @@
 
 /* ============================================================================
    HRMS Design System
-   A cohesive, modern aesthetic inspired by shadcn - black/white with warm accents
+   A cohesive, modern aesthetic - sharp, clean with subtle animations
    ============================================================================ */
 
 @theme inline {
@@ -98,7 +98,7 @@
 }
 
 /* ============================================================================
-   Light Theme - Clean whites with subtle warmth
+   Light Theme - Clean whites with sharp borders
    ============================================================================ */
 :root {
     /* Typography */
@@ -112,11 +112,11 @@
     --color-4: oklch(80.2% 0.134 225);
     --color-5: oklch(90.7% 0.231 133);
 
-    /* Core palette - warm white base */
-    --background: 0 0% 99%;
+    /* Core palette - crisp white base */
+    --background: 0 0% 100%;
     --foreground: 0 0% 6%;
 
-    /* Card surfaces with subtle warmth */
+    /* Card surfaces - pure white with sharp borders */
     --card: 0 0% 100%;
     --card-foreground: 0 0% 6%;
 
@@ -133,33 +133,33 @@
     --secondary-foreground: 0 0% 12%;
 
     /* Muted surfaces */
-    --muted: 40 10% 96%;
+    --muted: 0 0% 96%;
     --muted-foreground: 0 0% 40%;
 
     /* Accent */
-    --accent: 40 10% 95%;
+    --accent: 0 0% 96%;
     --accent-foreground: 0 0% 12%;
 
     /* Destructive */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    /* Borders - subtle warm gray */
-    --border: 40 6% 90%;
-    --input: 40 6% 90%;
+    /* Borders - sharp, defined */
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
     --ring: 0 0% 8%;
 
-    /* Border radius */
-    --radius: 0.625rem;
+    /* Border radius - slightly sharper */
+    --radius: 0.5rem;
 
-    /* Sidebar - slightly cooler for contrast */
-    --sidebar: hsl(0 0% 99%);
+    /* Sidebar */
+    --sidebar: hsl(0 0% 100%);
     --sidebar-foreground: hsl(0 0% 20%);
     --sidebar-primary: hsl(0 0% 8%);
     --sidebar-primary-foreground: hsl(0 0% 98%);
-    --sidebar-accent: hsl(40 10% 96%);
+    --sidebar-accent: hsl(0 0% 96%);
     --sidebar-accent-foreground: hsl(0 0% 12%);
-    --sidebar-border: hsl(40 6% 92%);
+    --sidebar-border: hsl(0 0% 90%);
     --sidebar-ring: hsl(0 0% 8%);
 
     /* Status colors - consistent across the app */
@@ -174,7 +174,7 @@
 }
 
 /* ============================================================================
-   Dark Theme - Rich blacks with depth
+   Dark Theme - Rich blacks with sharp contrast
    ============================================================================ */
 .dark {
     --color-1: oklch(66.2% 0.225 25.9);
@@ -183,16 +183,16 @@
     --color-4: oklch(80.2% 0.134 225);
     --color-5: oklch(90.7% 0.231 133);
 
-    /* Core palette - rich black */
-    --background: 0 0% 4%;
+    /* Core palette - rich black with sharp contrast */
+    --background: 0 0% 5%;
     --foreground: 0 0% 95%;
 
     /* Card surfaces - elevated from background */
-    --card: 0 0% 6%;
+    --card: 0 0% 8%;
     --card-foreground: 0 0% 95%;
 
     /* Popover */
-    --popover: 0 0% 6%;
+    --popover: 0 0% 8%;
     --popover-foreground: 0 0% 95%;
 
     /* Primary - bright white */
@@ -215,19 +215,19 @@
     --destructive: 0 62% 45%;
     --destructive-foreground: 0 0% 98%;
 
-    /* Borders */
-    --border: 0 0% 14%;
-    --input: 0 0% 14%;
+    /* Borders - sharp definition */
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
     --ring: 0 0% 85%;
 
     /* Sidebar */
-    --sidebar: hsl(0 0% 5%);
+    --sidebar: hsl(0 0% 6%);
     --sidebar-foreground: hsl(0 0% 90%);
     --sidebar-primary: hsl(0 0% 95%);
     --sidebar-primary-foreground: hsl(0 0% 6%);
     --sidebar-accent: hsl(0 0% 12%);
     --sidebar-accent-foreground: hsl(0 0% 95%);
-    --sidebar-border: hsl(0 0% 12%);
+    --sidebar-border: hsl(0 0% 15%);
     --sidebar-ring: hsl(0 0% 85%);
 
     /* Status colors for dark mode */
@@ -251,38 +251,38 @@
     }
 
     html {
-        font-family: var(--font-sans);
-        font-feature-settings: "cv11", "ss01";
-        font-variation-settings: "opsz" 32;
+        scroll-behavior: smooth;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
     }
 
     body {
+        font-family: var(--font-sans);
         background-color: hsl(var(--background));
         color: hsl(var(--foreground));
-        font-feature-settings:
-            "rlig" 1,
-            "calt" 1;
+        line-height: 1.5;
     }
 
-    /* Improved focus states */
+    /* Focus styles */
     :focus-visible {
         outline: 2px solid hsl(var(--ring));
         outline-offset: 2px;
     }
 
-    /* Better selection colors */
+    /* Selection colors */
     ::selection {
-        background-color: hsl(var(--primary) / 0.15);
-        color: hsl(var(--foreground));
+        background-color: hsl(var(--primary));
+        color: hsl(var(--primary-foreground));
     }
 
     .dark ::selection {
-        background-color: hsl(var(--primary) / 0.3);
+        background-color: hsl(var(--primary) / 0.9);
     }
 
     /* Smooth scrolling */
     html {
-        scroll-behavior: smooth;
+        scroll-padding-top: 4rem;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -305,9 +305,12 @@
    ============================================================================ */
 @layer utilities {
     .font-display {
-        font-family: var(--font-sans);
-        font-weight: 700;
-        letter-spacing: -0.02em;
+        font-family:
+            "Sora",
+            system-ui,
+            -apple-system,
+            sans-serif;
+        font-feature-settings: "ss01" 1;
     }
 
     .font-mono {
@@ -318,31 +321,34 @@
         text-wrap: balance;
     }
 
-    /* Tabular numbers for data display */
+    /* Tabular numbers for consistent width in numbers */
     .tabular-nums {
         font-variant-numeric: tabular-nums;
-        font-family: var(--font-mono);
+        font-feature-settings: "tnum";
     }
 
     /* Gradient text */
     .text-gradient {
         background: linear-gradient(
             135deg,
-            hsl(var(--foreground)) 0%,
-            hsl(var(--muted-foreground)) 100%
+            hsl(var(--foreground)),
+            hsl(var(--foreground) / 0.7)
         );
+        background-clip: text;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        background-clip: text;
+        background-size: 200% 200%;
+        animation: gradient-shift 3s ease infinite;
     }
 }
 
 /* ============================================================================
-   Animation Utilities - Staggered reveals
+   Animation Utilities - Keep smooth animations
    ============================================================================ */
 @layer utilities {
+    /* Fade in animation */
     .animate-in {
-        animation: fade-in-up 0.5s ease-out forwards;
+        animation: fade-in-up 0.4s ease-out forwards;
         opacity: 0;
     }
 
@@ -381,7 +387,7 @@
         opacity: 0;
     }
 
-    /* Hover lift effect */
+    /* Subtle hover lift effect - toned down */
     .hover-lift {
         transition:
             transform 0.2s ease,
@@ -389,21 +395,21 @@
     }
 
     .hover-lift:hover {
-        transform: translateY(-2px);
+        transform: translateY(-1px);
         box-shadow:
-            0 8px 25px -5px rgb(0 0 0 / 0.1),
-            0 4px 10px -6px rgb(0 0 0 / 0.1);
+            0 4px 12px -2px rgb(0 0 0 / 0.08),
+            0 2px 6px -2px rgb(0 0 0 / 0.05);
     }
 
     .dark .hover-lift:hover {
         box-shadow:
-            0 8px 25px -5px rgb(0 0 0 / 0.3),
-            0 4px 10px -6px rgb(0 0 0 / 0.2);
+            0 4px 12px -2px rgb(0 0 0 / 0.4),
+            0 2px 6px -2px rgb(0 0 0 / 0.3);
     }
 }
 
 /* ============================================================================
-   Background Patterns & Effects
+   Background Patterns & Effects - Minimal
    ============================================================================ */
 @layer utilities {
     /* Subtle grid pattern */
@@ -411,12 +417,12 @@
         background-image:
             linear-gradient(
                 to right,
-                hsl(var(--border) / 0.5) 1px,
+                hsl(var(--border) / 0.3) 1px,
                 transparent 1px
             ),
             linear-gradient(
                 to bottom,
-                hsl(var(--border) / 0.5) 1px,
+                hsl(var(--border) / 0.3) 1px,
                 transparent 1px
             );
         background-size: 24px 24px;
@@ -426,12 +432,12 @@
         background-image:
             linear-gradient(
                 to right,
-                hsl(var(--border) / 0.3) 1px,
+                hsl(var(--border) / 0.2) 1px,
                 transparent 1px
             ),
             linear-gradient(
                 to bottom,
-                hsl(var(--border) / 0.3) 1px,
+                hsl(var(--border) / 0.2) 1px,
                 transparent 1px
             );
     }
@@ -445,69 +451,38 @@
         background-size: 16px 16px;
     }
 
-    /* Noise texture overlay */
-    .bg-noise {
-        position: relative;
-    }
-
-    .bg-noise::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-        opacity: 0.02;
-        pointer-events: none;
-        mix-blend-mode: overlay;
-    }
-
-    .dark .bg-noise::before {
-        opacity: 0.03;
-    }
-
-    /* Gradient overlays */
+    /* Very subtle gradient overlays */
     .bg-gradient-subtle {
         background: linear-gradient(
             180deg,
             hsl(var(--background)) 0%,
-            hsl(var(--muted) / 0.3) 100%
+            hsl(var(--muted) / 0.1) 100%
         );
     }
 
     .bg-gradient-radial {
         background: radial-gradient(
             ellipse at top,
-            hsl(var(--muted) / 0.5) 0%,
+            hsl(var(--muted) / 0.2) 0%,
             transparent 50%
         );
     }
 }
 
 /* ============================================================================
-   Card Accent Utilities
+   Card Accent Utilities - DEPRECATED - DO NOT USE
+   These classes are deprecated and should be removed from components.
+   Cards should have clean borders without colored left strips.
    ============================================================================ */
 @layer utilities {
-    .card-accent-emerald {
-        border-left: 3px solid hsl(142 76% 36%);
-    }
-
-    .card-accent-blue {
-        border-left: 3px solid hsl(214 100% 50%);
-    }
-
-    .card-accent-amber {
-        border-left: 3px solid hsl(38 92% 50%);
-    }
-
-    .card-accent-rose {
-        border-left: 3px solid hsl(0 84% 60%);
-    }
-
-    .card-accent-violet {
-        border-left: 3px solid hsl(262 83% 58%);
-    }
-
+    /* These classes intentionally do nothing - cards should be clean */
+    .card-accent-emerald,
+    .card-accent-blue,
+    .card-accent-amber,
+    .card-accent-rose,
+    .card-accent-violet,
     .card-accent-cyan {
-        border-left: 3px solid hsl(186 100% 42%);
+        /* No border accent - use clean card design instead */
     }
 }
 
@@ -519,56 +494,56 @@
     .status-success {
         background-color: hsl(var(--status-success-bg));
         color: hsl(var(--status-success));
-        border: 1px solid hsl(var(--status-success) / 0.2);
+        border-color: hsl(var(--status-success) / 0.2);
     }
 
-    /* Warning states (pending, late, on_probation) */
+    /* Warning states (pending, late, expiring) */
     .status-warning {
         background-color: hsl(var(--status-warning-bg));
         color: hsl(var(--status-warning));
-        border: 1px solid hsl(var(--status-warning) / 0.2);
+        border-color: hsl(var(--status-warning) / 0.2);
     }
 
-    /* Error states (suspended, rejected, failed, absent) */
+    /* Error states (rejected, failed, absent) */
     .status-error {
         background-color: hsl(var(--status-error-bg));
         color: hsl(var(--status-error));
-        border: 1px solid hsl(var(--status-error) / 0.2);
+        border-color: hsl(var(--status-error) / 0.2);
     }
 
-    /* Info states (on_leave, initiated, in_progress) */
+    /* Info states (in-progress, scheduled) */
     .status-info {
         background-color: hsl(var(--status-info-bg));
         color: hsl(var(--status-info));
-        border: 1px solid hsl(var(--status-info) / 0.2);
+        border-color: hsl(var(--status-info) / 0.2);
     }
 
-    /* Neutral states (cancelled, unknown) */
+    /* Neutral states (inactive, cancelled) */
     .status-neutral {
         background-color: hsl(var(--muted));
         color: hsl(var(--muted-foreground));
-        border: 1px solid hsl(var(--border));
+        border-color: hsl(var(--border));
     }
 }
 
 /* ============================================================================
-   Data Table Enhancements
+   Data Table Styles
    ============================================================================ */
 @layer components {
     .data-table {
-        font-size: 0.875rem;
+        width: 100%;
     }
 
     .data-table th {
-        font-weight: 500;
-        text-transform: uppercase;
-        font-size: 0.75rem;
-        letter-spacing: 0.05em;
-        color: hsl(var(--muted-foreground));
+        font-weight: 600;
+        text-align: left;
+        padding: 0.75rem 1rem;
+        background-color: hsl(var(--muted));
+        border-bottom: 1px solid hsl(var(--border));
     }
 
     .data-table tr {
-        transition: background-color 0.15s ease;
+        border-bottom: 1px solid hsl(var(--border));
     }
 
     .data-table tr:hover {
@@ -576,66 +551,65 @@
     }
 
     .data-table td {
-        vertical-align: middle;
+        padding: 0.75rem 1rem;
     }
 }
 
 /* ============================================================================
-   Page Header Component
+   Page Header Styles
    ============================================================================ */
 @layer components {
     .page-header {
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
+        margin-bottom: 2rem;
     }
 
     .page-header h1 {
-        font-family: var(--font-sans);
+        font-size: 2rem;
         font-weight: 700;
-        font-size: 1.875rem;
-        letter-spacing: -0.02em;
         line-height: 1.2;
+        letter-spacing: -0.02em;
     }
 
     .page-header p {
         color: hsl(var(--muted-foreground));
-        font-size: 0.9375rem;
+        font-size: 0.95rem;
     }
 
     @media (min-width: 768px) {
         .page-header h1 {
-            font-size: 2.25rem;
+            font-size: 2.5rem;
         }
     }
 }
 
 /* ============================================================================
-   View Transitions (for smooth theme switching)
+   View Transitions (for supported browsers)
    ============================================================================ */
 ::view-transition-old(root),
 ::view-transition-new(root) {
-    animation: none;
-    mix-blend-mode: normal;
+    animation-duration: 0.3s;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ============================================================================
-   Scrollbar Styling
+   Scrollbar Styling - Clean and minimal
    ============================================================================ */
-@layer base {
-    /* Custom scrollbar for webkit browsers */
+@layer utilities {
     ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
+        width: 10px;
+        height: 10px;
     }
 
     ::-webkit-scrollbar-track {
-        background: transparent;
+        background: hsl(var(--muted) / 0.3);
     }
 
     ::-webkit-scrollbar-thumb {
-        background: hsl(var(--border));
-        border-radius: 4px;
+        background: hsl(var(--muted-foreground) / 0.3);
+        border-radius: 5px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
@@ -643,11 +617,11 @@
     }
 
     .dark ::-webkit-scrollbar-thumb {
-        background: hsl(var(--border));
+        background: hsl(var(--muted-foreground) / 0.3);
     }
 
     .dark ::-webkit-scrollbar-thumb:hover {
-        background: hsl(var(--muted-foreground) / 0.4);
+        background: hsl(var(--muted-foreground) / 0.5);
     }
 }
 
@@ -655,6 +629,7 @@
    Print Styles
    ============================================================================ */
 @media print {
+    /* Hide non-essential elements */
     .no-print {
         display: none !important;
     }
@@ -665,6 +640,6 @@
     }
 
     .page-break {
-        page-break-before: always;
+        page-break-after: always;
     }
 }
