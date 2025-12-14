@@ -6,13 +6,13 @@ import { Link } from "@tanstack/react-router";
 import {
   Building2,
   CalendarDays,
-  Home,
   Users,
   Clock,
-  Shield,
   UserPlus,
   BarChart3,
   Network,
+  ShieldPlus,
+  Monitor,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -129,7 +129,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       {
         title: "Dashboard",
         url: "/dashboard",
-        icon: Home,
+        icon: Monitor,
         isActive: true,
       },
 
@@ -231,7 +231,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             {
               title: "Governance",
               url: "/dashboard/governance/audit",
-              icon: Shield,
+              icon: ShieldPlus,
               items: [
                 {
                   title: "Audit Logs",
