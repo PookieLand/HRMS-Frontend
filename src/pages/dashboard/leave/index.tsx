@@ -315,43 +315,86 @@ export default function LeavePage() {
                 <span className="sm:hidden">Apply</span>
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="text-xl">Apply for Leave</DialogTitle>
-                <DialogDescription>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-950 border border-gray-200 dark:border-slate-800 shadow-2xl">
+              <DialogHeader className="border-b border-gray-200 dark:border-slate-800 pb-4">
+                <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Apply for Leave
+                </DialogTitle>
+                <DialogDescription className="text-gray-600 dark:text-gray-400 pt-1">
                   Fill in the details below to submit your leave request
                 </DialogDescription>
               </DialogHeader>
-              <div className="space-y-4 py-4">
+              <div className="space-y-5 py-6">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="leave-type">Leave Type *</Label>
+                  <div className="space-y-2.5">
+                    <Label
+                      htmlFor="leave-type"
+                      className="text-gray-700 dark:text-gray-300 font-semibold"
+                    >
+                      Leave Type <span className="text-red-500">*</span>
+                    </Label>
                     <Select value={leaveType} onValueChange={setLeaveType}>
-                      <SelectTrigger id="leave-type">
+                      <SelectTrigger
+                        id="leave-type"
+                        className="bg-white dark:bg-slate-900 border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white"
+                      >
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="annual">Annual Leave</SelectItem>
-                        <SelectItem value="sick">Sick Leave</SelectItem>
-                        <SelectItem value="casual">Casual Leave</SelectItem>
-                        <SelectItem value="maternity">
+                      <SelectContent className="bg-white dark:bg-slate-900 border-gray-300 dark:border-slate-700">
+                        <SelectItem
+                          value="annual"
+                          className="text-gray-900 dark:text-white"
+                        >
+                          Annual Leave
+                        </SelectItem>
+                        <SelectItem
+                          value="sick"
+                          className="text-gray-900 dark:text-white"
+                        >
+                          Sick Leave
+                        </SelectItem>
+                        <SelectItem
+                          value="casual"
+                          className="text-gray-900 dark:text-white"
+                        >
+                          Casual Leave
+                        </SelectItem>
+                        <SelectItem
+                          value="maternity"
+                          className="text-gray-900 dark:text-white"
+                        >
                           Maternity Leave
                         </SelectItem>
-                        <SelectItem value="paternity">
+                        <SelectItem
+                          value="paternity"
+                          className="text-gray-900 dark:text-white"
+                        >
                           Paternity Leave
                         </SelectItem>
-                        <SelectItem value="unpaid">Unpaid Leave</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
+                        <SelectItem
+                          value="unpaid"
+                          className="text-gray-900 dark:text-white"
+                        >
+                          Unpaid Leave
+                        </SelectItem>
+                        <SelectItem
+                          value="other"
+                          className="text-gray-900 dark:text-white"
+                        >
+                          Other
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
-                    <Label>Duration</Label>
-                    <div className="flex items-center justify-center h-10 px-3 border rounded-md bg-muted/50">
-                      <span className="text-lg font-bold tabular-nums">
+                  <div className="space-y-2.5">
+                    <Label className="text-gray-700 dark:text-gray-300 font-semibold">
+                      Duration
+                    </Label>
+                    <div className="flex items-center justify-center h-10 px-3 border border-gray-300 dark:border-slate-700 rounded-md bg-gray-50 dark:bg-slate-900 shadow-sm">
+                      <span className="text-lg font-bold tabular-nums text-gray-900 dark:text-white">
                         {calculateDays()}
                       </span>
-                      <span className="ml-2 text-muted-foreground text-sm">
+                      <span className="ml-2 text-gray-600 dark:text-gray-400 text-sm">
                         day(s)
                       </span>
                     </div>
@@ -359,53 +402,59 @@ export default function LeavePage() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="start-date">Start Date *</Label>
+                  <div className="space-y-2.5">
+                    <Label
+                      htmlFor="start-date"
+                      className="text-gray-700 dark:text-gray-300 font-semibold"
+                    >
+                      Start Date <span className="text-red-500">*</span>
+                    </Label>
                     <Input
                       id="start-date"
                       type="date"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
                       min={format(new Date(), "yyyy-MM-dd")}
+                      className="bg-white dark:bg-slate-900 border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="end-date">End Date *</Label>
+                  <div className="space-y-2.5">
+                    <Label
+                      htmlFor="end-date"
+                      className="text-gray-700 dark:text-gray-300 font-semibold"
+                    >
+                      End Date <span className="text-red-500">*</span>
+                    </Label>
                     <Input
                       id="end-date"
                       type="date"
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
                       min={startDate || format(new Date(), "yyyy-MM-dd")}
+                      className="bg-white dark:bg-slate-900 border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="reason">Reason *</Label>
+                <div className="space-y-2.5">
+                  <Label
+                    htmlFor="reason"
+                    className="text-gray-700 dark:text-gray-300 font-semibold"
+                  >
+                    Reason <span className="text-red-500">*</span>
+                  </Label>
                   <Textarea
                     id="reason"
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
                     placeholder="Please provide a reason for your leave request..."
                     rows={3}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="contact">
-                    Emergency Contact (while on leave)
-                  </Label>
-                  <Input
-                    id="contact"
-                    value={contactInfo}
-                    onChange={(e) => setContactInfo(e.target.value)}
-                    placeholder="Phone number or email"
+                    className="bg-white dark:bg-slate-900 border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
                   />
                 </div>
               </div>
 
-              <DialogFooter>
+              <DialogFooter className="border-t border-gray-200 dark:border-slate-800 pt-4 mt-2">
                 <Button
                   variant="outline"
                   onClick={() => {
@@ -413,10 +462,15 @@ export default function LeavePage() {
                     resetForm();
                   }}
                   disabled={isSubmitting}
+                  className="text-gray-700 dark:text-gray-300 border-gray-300 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-900"
                 >
                   Cancel
                 </Button>
-                <Button onClick={handleApplyLeave} disabled={isSubmitting}>
+                <Button
+                  onClick={handleApplyLeave}
+                  disabled={isSubmitting}
+                  className="bg-black dark:bg-gray-900 hover:bg-gray-900 dark:hover:bg-gray-800 text-white font-semibold"
+                >
                   {isSubmitting ? "Submitting..." : "Submit Request"}
                 </Button>
               </DialogFooter>

@@ -1,7 +1,7 @@
 import { useAsgardeo } from "@asgardeo/react";
 
 const ATTENDANCE_SERVICE_URL =
-  import.meta.env.VITE_ATTENDANCE_SERVICE_URL || "http://localhost:8003/api/v1";
+  import.meta.env.VITE_ATTENDANCE_SERVICE_URL || "http://localhost:8002/api/v1";
 
 export interface CheckInRequest {
   employee_id: string;

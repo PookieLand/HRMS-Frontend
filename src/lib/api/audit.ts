@@ -2,7 +2,7 @@
 import { useAsgardeo } from "@asgardeo/react";
 
 const AUDIT_SERVICE_URL =
-  import.meta.env.VITE_AUDIT_SERVICE_URL || "http://localhost:8005/api/v1";
+  import.meta.env.VITE_AUDIT_SERVICE_URL || "http://localhost:8004/api/v1";
 
 // ============================================================================
 // Types & Interfaces

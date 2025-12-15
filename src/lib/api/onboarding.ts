@@ -11,7 +11,8 @@
  * 7. Cancel/resend invitations
  */
 
-const API_BASE_URL = import.meta.env.VITE_USER_SERVICE_URL || "http://localhost:8001";
+const API_BASE_URL =
+  import.meta.env.VITE_USER_SERVICE_URL || "http://localhost:8000";
 
 // ============================================================================
 // Types
@@ -170,7 +171,7 @@ export interface OnboardingListResponse {
  */
 export async function initiateOnboarding(
   data: InitiateOnboardingRequest,
-  accessToken: string
+  accessToken: string,
 ): Promise<InitiateOnboardingResponse> {
   const response = await fetch(`${API_BASE_URL}/api/v1/onboarding/initiate`, {
     method: "POST",
@@ -182,7 +183,9 @@ export async function initiateOnboarding(
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ detail: "Failed to initiate onboarding" }));
+    const error = await response
+      .json()
+      .catch(() => ({ detail: "Failed to initiate onboarding" }));
     throw new Error(error.detail || "Failed to initiate onboarding");
   }
 
@@ -196,7 +199,7 @@ export async function initiateOnboarding(
  * No authentication required (uses invitation token).
  */
 export async function getOnboardingPreview(
-  invitationToken: string
+  invitationToken: string,
 ): Promise<OnboardingPreviewData> {
   const response = await fetch(
     `${API_BASE_URL}/api/v1/onboarding/preview/${invitationToken}`,
@@ -205,11 +208,13 @@ export async function getOnboardingPreview(
       headers: {
         "Content-Type": "application/json",
       },
-    }
+    },
   );
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ detail: "Invalid invitation" }));
+    const error = await response
+      .json()
+      .catch(() => ({ detail: "Invalid invitation" }));
     throw new Error(error.detail || "Failed to load invitation");
   }
 
@@ -223,18 +228,23 @@ export async function getOnboardingPreview(
  * No authentication required (uses invitation token).
  */
 export async function completeSignupStep1(
-  data: SignupStep1Request
+  data: SignupStep1Request,
 ): Promise<SignupStep1Response> {
-  const response = await fetch(`${API_BASE_URL}/api/v1/onboarding/signup/step1`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/onboarding/signup/step1`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
     },
-    body: JSON.stringify(data),
-  });
+  );
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ detail: "Failed to create account" }));
+    const error = await response
+      .json()
+      .catch(() => ({ detail: "Failed to create account" }));
     throw new Error(error.detail || "Failed to create account");
   }
 
@@ -248,18 +258,23 @@ export async function completeSignupStep1(
  * No authentication required (uses invitation token).
  */
 export async function completeSignupStep2(
-  data: SignupStep2Request
+  data: SignupStep2Request,
 ): Promise<SignupStep2Response> {
-  const response = await fetch(`${API_BASE_URL}/api/v1/onboarding/signup/step2`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/onboarding/signup/step2`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
     },
-    body: JSON.stringify(data),
-  });
+  );
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ detail: "Failed to complete profile" }));
+    const error = await response
+      .json()
+      .catch(() => ({ detail: "Failed to complete profile" }));
     throw new Error(error.detail || "Failed to complete profile");
   }
 
@@ -273,7 +288,7 @@ export async function completeSignupStep2(
  * No authentication required (uses invitation token).
  */
 export async function getOnboardingStatus(
-  invitationToken: string
+  invitationToken: string,
 ): Promise<OnboardingStatusResponse> {
   const response = await fetch(
     `${API_BASE_URL}/api/v1/onboarding/status/${invitationToken}`,
@@ -282,11 +297,13 @@ export async function getOnboardingStatus(
       headers: {
         "Content-Type": "application/json",
       },
-    }
+    },
   );
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ detail: "Failed to get status" }));
+    const error = await response
+      .json()
+      .catch(() => ({ detail: "Failed to get status" }));
     throw new Error(error.detail || "Failed to get onboarding status");
   }
 
@@ -305,12 +322,14 @@ export async function listOnboardingInvitations(
     status?: OnboardingStatus;
     offset?: number;
     limit?: number;
-  }
+  },
 ): Promise<OnboardingListResponse> {
   const queryParams = new URLSearchParams();
   if (params?.status) queryParams.append("status", params.status);
-  if (params?.offset !== undefined) queryParams.append("offset", params.offset.toString());
-  if (params?.limit !== undefined) queryParams.append("limit", params.limit.toString());
+  if (params?.offset !== undefined)
+    queryParams.append("offset", params.offset.toString());
+  if (params?.limit !== undefined)
+    queryParams.append("limit", params.limit.toString());
 
   const url = `${API_BASE_URL}/api/v1/onboarding/invitations${
     queryParams.toString() ? `?${queryParams.toString()}` : ""
@@ -325,7 +344,9 @@ export async function listOnboardingInvitations(
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ detail: "Failed to list invitations" }));
+    const error = await response
+      .json()
+      .catch(() => ({ detail: "Failed to list invitations" }));
     throw new Error(error.detail || "Failed to list onboarding invitations");
   }
 
@@ -341,7 +362,7 @@ export async function listOnboardingInvitations(
 export async function cancelOnboarding(
   invitationToken: string,
   accessToken: string,
-  reason?: string
+  reason?: string,
 ): Promise<{ message: string }> {
   const response = await fetch(
     `${API_BASE_URL}/api/v1/onboarding/cancel/${invitationToken}`,
@@ -352,11 +373,13 @@ export async function cancelOnboarding(
         Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({ reason }),
-    }
+    },
   );
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ detail: "Failed to cancel invitation" }));
+    const error = await response
+      .json()
+      .catch(() => ({ detail: "Failed to cancel invitation" }));
     throw new Error(error.detail || "Failed to cancel onboarding");
   }
 
@@ -371,7 +394,7 @@ export async function cancelOnboarding(
  */
 export async function resendInvitation(
   invitationToken: string,
-  accessToken: string
+  accessToken: string,
 ): Promise<{ message: string; new_expires_at: string }> {
   const response = await fetch(
     `${API_BASE_URL}/api/v1/onboarding/resend/${invitationToken}`,
@@ -381,11 +404,13 @@ export async function resendInvitation(
         "Content-Type": "application/json",
         Authorization: `Bearer ${accessToken}`,
       },
-    }
+    },
   );
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ detail: "Failed to resend invitation" }));
+    const error = await response
+      .json()
+      .catch(() => ({ detail: "Failed to resend invitation" }));
     throw new Error(error.detail || "Failed to resend invitation");
   }
 
@@ -423,7 +448,7 @@ export function formatOnboardingStatus(status: OnboardingStatus): string {
  * Get status badge color
  */
 export function getStatusBadgeVariant(
-  status: OnboardingStatus
+  status: OnboardingStatus,
 ): "default" | "secondary" | "success" | "destructive" | "outline" {
   switch (status) {
     case "completed":
@@ -468,7 +493,9 @@ export function getCurrentStepDescription(status: OnboardingStatus): string {
  * Check if invitation can be cancelled
  */
 export function canCancelInvitation(status: OnboardingStatus): boolean {
-  return ["initiated", "invitation_sent", "asgardeo_user_created"].includes(status);
+  return ["initiated", "invitation_sent", "asgardeo_user_created"].includes(
+    status,
+  );
 }
 
 /**

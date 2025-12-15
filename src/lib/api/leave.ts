@@ -1,7 +1,7 @@
 import { useAsgardeo } from "@asgardeo/react";
 
 const LEAVE_SERVICE_URL =
-  import.meta.env.VITE_LEAVE_SERVICE_URL || "http://localhost:8004/api/v1";
+  import.meta.env.VITE_LEAVE_SERVICE_URL || "http://localhost:8003/api/v1";
 
 export interface LeaveRequest {
   employee_id: string;
