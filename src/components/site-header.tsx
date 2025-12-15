@@ -18,7 +18,6 @@ const routeLabels: Record<string, string> = {
   employees: "Employees",
   onboard: "Onboard Employee",
   onboarding: "Onboarding Status",
-  teams: "Teams & Hierarchy",
   reports: "Reports & Analytics",
   attendance: "Attendance",
   team: "Team Attendance",

@@ -29,7 +29,6 @@ import OnboardPageOld from "./pages/dashboard/users/onboard.tsx";
 import EmployeeSignupPage from "./pages/employee-signup.tsx";
 import EmployeesDirectory from "./pages/dashboard/employees/index.tsx";
 import EmployeeDetail from "./pages/dashboard/employees/[id].tsx";
-import TeamsView from "./pages/dashboard/employees/teams.tsx";
 import EmployeeReports from "./pages/dashboard/employees/reports.tsx";
 import EmployeeOnboardPage from "./pages/dashboard/employees/onboard.tsx";
 import OnboardingStatusPage from "./pages/dashboard/employees/onboarding.tsx";
@@ -203,16 +202,6 @@ const onboardingStatusRoute = createRoute({
   },
 });
 
-const teamsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/dashboard/employees/teams",
-  component: TeamsView,
-  errorComponent: RouterErrorComponent,
-  beforeLoad: () => {
-    document.title = "Teams & Hierarchy - HRMS";
-  },
-});
-
 const employeeReportsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/dashboard/employees/reports",
@@ -301,7 +290,6 @@ const routeTree = rootRoute.addChildren([
   employeeDetailRoute,
   employeeOnboardRoute,
   onboardingStatusRoute,
-  teamsRoute,
   employeeReportsRoute,
   // Attendance routes
   attendanceRoute,

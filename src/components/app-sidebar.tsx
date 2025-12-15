@@ -160,16 +160,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 },
               ]
             : []),
-          // Teams & Hierarchy - for managers and above
-          ...(canManageTeam
-            ? [
-                {
-                  title: "Teams & Hierarchy",
-                  url: "/dashboard/employees/teams",
-                  icon: Network,
-                },
-              ]
-            : []),
           // Reports - for HR roles only
           ...(canManageEmployees
             ? [
