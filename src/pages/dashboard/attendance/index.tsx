@@ -101,7 +101,6 @@ export default function AttendancePage() {
     useState<AttendanceSummary | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [isCheckedIn, setIsCheckedIn] = useState(false);
-  const [employeeId, setEmployeeId] = useState<string>("");
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // Update time every second
@@ -111,23 +110,8 @@ export default function AttendancePage() {
   }, []);
 
   useEffect(() => {
-    const getEmployeeId = async () => {
-      try {
-        const decodedToken = await getDecodedIdToken();
-        const id = (decodedToken?.sub as string) || "";
-        setEmployeeId(id);
-      } catch (error) {
-        console.error("Failed to get employee ID:", error);
-      }
-    };
-    getEmployeeId();
-  }, [getDecodedIdToken]);
-
-  useEffect(() => {
-    if (employeeId) {
-      loadAttendanceData();
-    }
-  }, [employeeId]);
+    loadAttendanceData();
+  }, []);
 
   const loadAttendanceData = async (showRefreshing = false) => {
     if (showRefreshing) {
@@ -137,19 +121,142 @@ export default function AttendancePage() {
     }
 
     try {
-      const [today, recent, weekly, summary] = await Promise.all([
-        attendanceAPI.getTodayAttendance(employeeId),
-        attendanceAPI.getMyAttendance({ page: 1, page_size: 10 }),
-        attendanceAPI.getWeeklyReport(),
-        attendanceAPI.getMySummary("month"),
-      ]);
-
+      // Get today's attendance
+      const today = await attendanceAPI.getMyAttendanceToday();
       setTodayRecord(today);
       setIsCheckedIn(!!today && !today.check_out_time);
-      setRecentRecords(recent.records);
-      setWeeklyReport(weekly);
-      setMonthlySummary(summary);
+
+      // Get recent attendance history
+      const recent = await attendanceAPI.getMyAttendance({
+        limit: 10,
+        offset: 0,
+      });
+      setRecentRecords(recent);
+
+      // Get monthly summary and employee ID from first record
+      const now = new Date();
+      let employeeIdFromRecord = 0;
+      let monthlySummaryData = null;
+
+      if (recent.length > 0) {
+        employeeIdFromRecord = parseInt(recent[0].employee_id) || 0;
+
+        try {
+          const summary = await attendanceAPI.getMonthlySummary(
+            employeeIdFromRecord,
+            now.getMonth() + 1,
+            now.getFullYear(),
+          );
+
+          // Transform summary to match old format
+          monthlySummaryData = {
+            employee_id: String(employeeIdFromRecord),
+            period: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`,
+            total_days: summary.total_days_present + summary.total_days_absent,
+            present_days: summary.total_days_present,
+            absent_days: summary.total_days_absent,
+            late_days: summary.total_days_late,
+            leave_days: 0, // Not provided by backend
+            total_hours_worked: summary.total_hours_worked,
+            average_hours_per_day: summary.average_hours_per_day,
+            overtime_hours: summary.overtime_hours,
+            short_leave_count: 0, // Not provided by backend
+            attendance_percentage: summary.attendance_percentage,
+          };
+        } catch (summaryError) {
+          console.error("Failed to load monthly summary:", summaryError);
+          // Create a basic summary from available data
+          monthlySummaryData = {
+            employee_id: String(employeeIdFromRecord),
+            period: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`,
+            total_days: recent.length,
+            present_days: recent.filter((r) => r.status === "present").length,
+            absent_days: recent.filter((r) => r.status === "absent").length,
+            late_days: recent.filter((r) => r.status === "late").length,
+            leave_days: recent.filter((r) => r.status === "on_leave").length,
+            total_hours_worked: recent.reduce(
+              (sum, r) => sum + (r.duration_hours || 0),
+              0,
+            ),
+            average_hours_per_day:
+              recent.length > 0
+                ? recent.reduce((sum, r) => sum + (r.duration_hours || 0), 0) /
+                  recent.length
+                : 0,
+            overtime_hours: recent.reduce(
+              (sum, r) => sum + (r.overtime_hours || 0),
+              0,
+            ),
+            short_leave_count: recent.filter((r) => r.status === "short_leave")
+              .length,
+            attendance_percentage:
+              recent.length > 0
+                ? (recent.filter(
+                    (r) => r.status === "present" || r.status === "late",
+                  ).length /
+                    recent.length) *
+                  100
+                : 0,
+          };
+        }
+      } else {
+        // No records available, create empty summary
+        monthlySummaryData = {
+          employee_id: "0",
+          period: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`,
+          total_days: 0,
+          present_days: 0,
+          absent_days: 0,
+          late_days: 0,
+          leave_days: 0,
+          total_hours_worked: 0,
+          average_hours_per_day: 0,
+          overtime_hours: 0,
+          short_leave_count: 0,
+          attendance_percentage: 0,
+        };
+      }
+
+      setMonthlySummary(monthlySummaryData);
+
+      // Create weekly report from recent records
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - now.getDay());
+
+      const weeklyRecords = recent.filter((record) => {
+        const recordDate = new Date(record.date);
+        return recordDate >= startOfWeek && recordDate <= now;
+      });
+
+      const weekDays = Array.from({ length: 7 }, (_, i) => {
+        const day = new Date(startOfWeek);
+        day.setDate(startOfWeek.getDate() + i);
+        const dateStr = day.toISOString().split("T")[0];
+        const record = weeklyRecords.find((r) => r.date === dateStr);
+
+        return {
+          date: dateStr,
+          day_name: day.toLocaleDateString("en-US", { weekday: "short" }),
+          check_in: record?.check_in_time,
+          check_out: record?.check_out_time,
+          hours_worked: record?.duration_hours || 0,
+          status: record?.status || "absent",
+        };
+      });
+
+      setWeeklyReport({
+        employee_id: String(employeeIdFromRecord),
+        week_start: startOfWeek.toISOString().split("T")[0],
+        week_end: now.toISOString().split("T")[0],
+        days: weekDays,
+        total_hours: weekDays.reduce((sum, day) => sum + day.hours_worked, 0),
+        total_days_present: weekDays.filter(
+          (d) => d.status === "present" || d.status === "late",
+        ).length,
+        overtime_hours: monthlySummaryData?.overtime_hours || 0,
+      });
     } catch (error: any) {
+      console.error("Failed to load attendance data:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to load attendance data",
@@ -164,7 +271,6 @@ export default function AttendancePage() {
   const handleCheckIn = async () => {
     try {
       await attendanceAPI.checkIn({
-        employee_id: employeeId,
         location: "Office",
       });
 
@@ -185,9 +291,7 @@ export default function AttendancePage() {
 
   const handleCheckOut = async () => {
     try {
-      await attendanceAPI.checkOut({
-        employee_id: employeeId,
-      });
+      await attendanceAPI.checkOut({});
 
       toast({
         title: "Checked Out Successfully",

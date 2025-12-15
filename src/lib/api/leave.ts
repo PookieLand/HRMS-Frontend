@@ -154,9 +154,11 @@ export class LeaveAPI {
     return response.json();
   }
 
-  // Leave application
-  async applyLeave(data: LeaveRequest): Promise<LeaveRecord> {
-    return this.request<LeaveRecord>("/leave/apply", {
+  // Leave application (Self-Service)
+  async applyLeave(
+    data: Omit<LeaveRequest, "employee_id">,
+  ): Promise<LeaveRecord> {
+    return this.request<LeaveRecord>("/leaves/me", {
       method: "POST",
       body: JSON.stringify(data),
     });
@@ -165,258 +167,110 @@ export class LeaveAPI {
   async cancelLeave(
     leaveId: string,
     reason?: string,
-  ): Promise<{ message: string }> {
-    return this.request(`/leave/${leaveId}/cancel`, {
+  ): Promise<{ ok: boolean; message: string }> {
+    return this.request(`/leaves/me/${leaveId}/cancel`, {
       method: "POST",
       body: JSON.stringify({ reason }),
     });
   }
 
-  // Get leave records
+  // Get leave records (Self-Service)
   async getMyLeaves(params?: {
     status?: string;
-    start_date?: string;
-    end_date?: string;
-    page?: number;
-    page_size?: number;
-  }): Promise<{
-    leaves: LeaveRecord[];
-    total: number;
-    page: number;
-    page_size: number;
-  }> {
+    leave_type?: string;
+    offset?: number;
+    limit?: number;
+  }): Promise<LeaveRecord[]> {
     const query = new URLSearchParams();
     if (params?.status) query.append("status", params.status);
-    if (params?.start_date) query.append("start_date", params.start_date);
-    if (params?.end_date) query.append("end_date", params.end_date);
-    if (params?.page) query.append("page", params.page.toString());
-    if (params?.page_size)
-      query.append("page_size", params.page_size.toString());
+    if (params?.leave_type) query.append("leave_type", params.leave_type);
+    if (params?.offset !== undefined)
+      query.append("offset", params.offset.toString());
+    if (params?.limit !== undefined)
+      query.append("limit", params.limit.toString());
 
-    return this.request(`/leave/my-leaves?${query.toString()}`);
+    return this.request(`/leaves/me?${query.toString()}`);
   }
 
   async getLeaveById(leaveId: string): Promise<LeaveRecord> {
-    return this.request(`/leave/${leaveId}`);
+    return this.request(`/leaves/${leaveId}`);
   }
 
   async getEmployeeLeaves(
     employeeId: string,
     params?: {
       status?: string;
-      start_date?: string;
-      end_date?: string;
-      page?: number;
-      page_size?: number;
+      leave_type?: string;
+      offset?: number;
+      limit?: number;
     },
-  ): Promise<{
-    leaves: LeaveRecord[];
-    total: number;
-    page: number;
-    page_size: number;
-  }> {
+  ): Promise<LeaveRecord[]> {
     const query = new URLSearchParams();
     if (params?.status) query.append("status", params.status);
-    if (params?.start_date) query.append("start_date", params.start_date);
-    if (params?.end_date) query.append("end_date", params.end_date);
-    if (params?.page) query.append("page", params.page.toString());
-    if (params?.page_size)
-      query.append("page_size", params.page_size.toString());
+    if (params?.leave_type) query.append("leave_type", params.leave_type);
+    if (params?.offset !== undefined)
+      query.append("offset", params.offset.toString());
+    if (params?.limit !== undefined)
+      query.append("limit", params.limit.toString());
 
-    return this.request(`/leave/employee/${employeeId}?${query.toString()}`);
+    return this.request(`/leaves/employee/${employeeId}?${query.toString()}`);
   }
 
   // Leave approval (for managers/HR)
   async getPendingApprovals(params?: {
-    page?: number;
-    page_size?: number;
-  }): Promise<{
-    leaves: LeaveRecord[];
-    total: number;
-    page: number;
-    page_size: number;
-  }> {
+    offset?: number;
+    limit?: number;
+  }): Promise<LeaveRecord[]> {
     const query = new URLSearchParams();
-    if (params?.page) query.append("page", params.page.toString());
-    if (params?.page_size)
-      query.append("page_size", params.page_size.toString());
+    if (params?.offset !== undefined)
+      query.append("offset", params.offset.toString());
+    if (params?.limit !== undefined)
+      query.append("limit", params.limit.toString());
 
-    return this.request(`/leave/approvals/pending?${query.toString()}`);
+    return this.request(`/leaves/pending?${query.toString()}`);
   }
 
   async approveLeave(leaveId: string, notes?: string): Promise<LeaveRecord> {
-    return this.request(`/leave/${leaveId}/approve`, {
+    return this.request(`/leaves/${leaveId}/approve`, {
       method: "POST",
-      body: JSON.stringify({ notes }),
+      body: JSON.stringify({ approval_notes: notes }),
     });
   }
 
   async rejectLeave(leaveId: string, reason: string): Promise<LeaveRecord> {
-    return this.request(`/leave/${leaveId}/reject`, {
+    return this.request(`/leaves/${leaveId}/reject`, {
       method: "POST",
-      body: JSON.stringify({ reason }),
+      body: JSON.stringify({ rejection_reason: reason }),
     });
   }
 
-  // Leave balance
-  async getMyBalance(year?: number): Promise<LeaveSummary> {
-    const query = year ? `?year=${year}` : "";
-    return this.request(`/leave/my-balance${query}`);
-  }
-
-  async getEmployeeBalance(
-    employeeId: string,
-    year?: number,
-  ): Promise<LeaveSummary> {
-    const query = year ? `?year=${year}` : "";
-    return this.request(`/leave/employee/${employeeId}/balance${query}`);
-  }
-
-  // Calendar and team views
-  async getMyCalendar(
-    month?: number,
-    year?: number,
-  ): Promise<LeaveCalendarEvent[]> {
-    const query = new URLSearchParams();
-    if (month) query.append("month", month.toString());
-    if (year) query.append("year", year.toString());
-
-    return this.request(`/leave/my-calendar?${query.toString()}`);
-  }
-
-  async getTeamCalendar(
-    month?: number,
-    year?: number,
-  ): Promise<TeamLeaveCalendar> {
-    const query = new URLSearchParams();
-    if (month) query.append("month", month.toString());
-    if (year) query.append("year", year.toString());
-
-    return this.request(`/leave/team-calendar?${query.toString()}`);
-  }
-
-  async getOrganizationCalendar(
-    month?: number,
-    year?: number,
-  ): Promise<LeaveCalendarEvent[]> {
-    const query = new URLSearchParams();
-    if (month) query.append("month", month.toString());
-    if (year) query.append("year", year.toString());
-
-    return this.request(`/leave/organization-calendar?${query.toString()}`);
-  }
-
-  async getEmployeesOnLeaveToday(): Promise<
-    Array<{
-      employee_id: string;
-      employee_name: string;
-      leave_type: string;
-      return_date: string;
-    }>
-  > {
-    return this.request("/leave/on-leave-today");
-  }
-
-  // Dashboard metrics (for HR/managers)
-  async getDashboardMetrics(): Promise<LeaveDashboardMetrics> {
-    return this.request("/leave/metrics/dashboard");
-  }
-
-  async getLeaveTrends(months: number = 6): Promise<
-    Array<{
-      month: string;
-      total_leaves: number;
-      by_type: Record<string, number>;
-    }>
-  > {
-    return this.request(`/leave/metrics/trends?months=${months}`);
-  }
-
-  // Policies
-  async getLeavePolicies(): Promise<LeavePolicy[]> {
-    return this.request("/leave/policies");
-  }
-
-  async getLeavePolicy(leaveType: string): Promise<LeavePolicy> {
-    return this.request(`/leave/policies/${leaveType}`);
-  }
-
-  // Team leaves (for managers)
-  async getTeamLeaves(params?: {
-    status?: string;
-    start_date?: string;
-    end_date?: string;
-    page?: number;
-    page_size?: number;
-  }): Promise<{
-    leaves: LeaveRecord[];
-    total: number;
-    page: number;
-    page_size: number;
+  // Dashboard summary (for HR)
+  async getDashboardSummary(): Promise<{
+    total_leaves: number;
+    pending_leaves: number;
+    approved_leaves: number;
+    rejected_leaves: number;
+    cancelled_leaves: number;
   }> {
-    const query = new URLSearchParams();
-    if (params?.status) query.append("status", params.status);
-    if (params?.start_date) query.append("start_date", params.start_date);
-    if (params?.end_date) query.append("end_date", params.end_date);
-    if (params?.page) query.append("page", params.page.toString());
-    if (params?.page_size)
-      query.append("page_size", params.page_size.toString());
-
-    return this.request(`/leave/team?${query.toString()}`);
+    return this.request(`/leaves/dashboard/summary`);
   }
 
   // All leaves (for HR Admin/Manager)
   async getAllLeaves(params?: {
     status?: string;
     leave_type?: string;
-    start_date?: string;
-    end_date?: string;
-    search?: string;
-    page?: number;
-    page_size?: number;
-  }): Promise<{
-    leaves: LeaveRecord[];
-    total: number;
-    page: number;
-    page_size: number;
-  }> {
+    offset?: number;
+    limit?: number;
+  }): Promise<LeaveRecord[]> {
     const query = new URLSearchParams();
     if (params?.status) query.append("status", params.status);
     if (params?.leave_type) query.append("leave_type", params.leave_type);
-    if (params?.start_date) query.append("start_date", params.start_date);
-    if (params?.end_date) query.append("end_date", params.end_date);
-    if (params?.search) query.append("search", params.search);
-    if (params?.page) query.append("page", params.page.toString());
-    if (params?.page_size)
-      query.append("page_size", params.page_size.toString());
+    if (params?.offset !== undefined)
+      query.append("offset", params.offset.toString());
+    if (params?.limit !== undefined)
+      query.append("limit", params.limit.toString());
 
-    return this.request(`/leave/all?${query.toString()}`);
-  }
-
-  // Reports
-  async getLeaveReport(params: {
-    start_date: string;
-    end_date: string;
-    employee_id?: string;
-    leave_type?: string;
-    department?: string;
-  }): Promise<{
-    summary: {
-      total_leaves: number;
-      by_type: Record<string, number>;
-      by_status: Record<string, number>;
-      average_duration: number;
-    };
-    records: LeaveRecord[];
-  }> {
-    const query = new URLSearchParams();
-    query.append("start_date", params.start_date);
-    query.append("end_date", params.end_date);
-    if (params.employee_id) query.append("employee_id", params.employee_id);
-    if (params.leave_type) query.append("leave_type", params.leave_type);
-    if (params.department) query.append("department", params.department);
-
-    return this.request(`/leave/reports/detailed?${query.toString()}`);
+    return this.request(`/leaves?${query.toString()}`);
   }
 }
 

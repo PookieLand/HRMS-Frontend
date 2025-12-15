@@ -143,15 +143,33 @@ export class AttendanceAPI {
     return response.json();
   }
 
-  // Check-in/Check-out
-  async checkIn(data: CheckInRequest): Promise<AttendanceRecord> {
+  // Check-in/Check-out (for self)
+  async checkIn(data: {
+    location?: string;
+    notes?: string;
+  }): Promise<AttendanceRecord> {
+    return this.request<AttendanceRecord>("/attendance/check-in-self", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async checkOut(data: { notes?: string }): Promise<AttendanceRecord> {
+    return this.request<AttendanceRecord>("/attendance/check-out-self", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Admin/Manager check-in/check-out for others
+  async checkInEmployee(data: CheckInRequest): Promise<AttendanceRecord> {
     return this.request<AttendanceRecord>("/attendance/check-in", {
       method: "POST",
       body: JSON.stringify(data),
     });
   }
 
-  async checkOut(data: CheckOutRequest): Promise<AttendanceRecord> {
+  async checkOutEmployee(data: CheckOutRequest): Promise<AttendanceRecord> {
     return this.request<AttendanceRecord>("/attendance/check-out", {
       method: "POST",
       body: JSON.stringify(data),
@@ -159,105 +177,109 @@ export class AttendanceAPI {
   }
 
   // Get attendance records
+  async getMyAttendanceToday(): Promise<AttendanceRecord | null> {
+    try {
+      return await this.request<AttendanceRecord>("/attendance/me/today");
+    } catch (error) {
+      return null;
+    }
+  }
+
   async getMyAttendance(params?: {
     start_date?: string;
     end_date?: string;
-    page?: number;
-    page_size?: number;
-  }): Promise<{
-    records: AttendanceRecord[];
-    total: number;
-    page: number;
-    page_size: number;
-  }> {
+    offset?: number;
+    limit?: number;
+  }): Promise<AttendanceRecord[]> {
     const query = new URLSearchParams();
     if (params?.start_date) query.append("start_date", params.start_date);
     if (params?.end_date) query.append("end_date", params.end_date);
-    if (params?.page) query.append("page", params.page.toString());
-    if (params?.page_size)
-      query.append("page_size", params.page_size.toString());
+    if (params?.offset !== undefined)
+      query.append("offset", params.offset.toString());
+    if (params?.limit !== undefined)
+      query.append("limit", params.limit.toString());
 
-    return this.request(`/attendance/my-attendance?${query.toString()}`);
+    return this.request<AttendanceRecord[]>(
+      `/attendance/me/history?${query.toString()}`,
+    );
   }
 
   async getEmployeeAttendance(
-    employeeId: string,
+    employeeId: number,
     params?: {
       start_date?: string;
       end_date?: string;
-      page?: number;
-      page_size?: number;
+      offset?: number;
+      limit?: number;
     },
-  ): Promise<{
-    records: AttendanceRecord[];
-    total: number;
-    page: number;
-    page_size: number;
-  }> {
+  ): Promise<AttendanceRecord[]> {
     const query = new URLSearchParams();
     if (params?.start_date) query.append("start_date", params.start_date);
     if (params?.end_date) query.append("end_date", params.end_date);
-    if (params?.page) query.append("page", params.page.toString());
-    if (params?.page_size)
-      query.append("page_size", params.page_size.toString());
+    if (params?.offset !== undefined)
+      query.append("offset", params.offset.toString());
+    if (params?.limit !== undefined)
+      query.append("limit", params.limit.toString());
 
-    return this.request(
+    return this.request<AttendanceRecord[]>(
       `/attendance/employee/${employeeId}?${query.toString()}`,
     );
   }
 
-  async getTodayAttendance(
-    employeeId: string,
-  ): Promise<AttendanceRecord | null> {
-    return this.request(`/attendance/employee/${employeeId}/today`);
-  }
-
   // Summary and Reports
-  async getMySummary(
-    period: "week" | "month" | "year" = "month",
-  ): Promise<AttendanceSummary> {
-    return this.request(`/attendance/my-summary?period=${period}`);
-  }
-
-  async getEmployeeSummary(
-    employeeId: string,
-    period: "week" | "month" | "year" = "month",
-  ): Promise<AttendanceSummary> {
-    return this.request(
-      `/attendance/employee/${employeeId}/summary?period=${period}`,
-    );
-  }
-
-  async getWeeklyReport(employeeId?: string): Promise<WeeklyAttendanceReport> {
-    const endpoint = employeeId
-      ? `/attendance/reports/weekly/${employeeId}`
-      : "/attendance/reports/my-weekly";
-    return this.request(endpoint);
-  }
-
-  async getMonthlyReport(
-    employeeId?: string,
+  async getMonthlySummary(
+    employeeId: number,
     month?: number,
     year?: number,
-  ): Promise<MonthlyAttendanceReport> {
+  ): Promise<{
+    employee_id: number;
+    month: number;
+    year: number;
+    total_days_present: number;
+    total_days_late: number;
+    total_days_absent: number;
+    total_hours_worked: number;
+    average_hours_per_day: number;
+    overtime_hours: number;
+    attendance_percentage: number;
+    records: AttendanceRecord[];
+  }> {
     const query = new URLSearchParams();
     if (month) query.append("month", month.toString());
     if (year) query.append("year", year.toString());
 
-    const endpoint = employeeId
-      ? `/attendance/reports/monthly/${employeeId}?${query.toString()}`
-      : `/attendance/reports/my-monthly?${query.toString()}`;
-    return this.request(endpoint);
+    return this.request(
+      `/attendance/employee/${employeeId}/monthly-summary?${query.toString()}`,
+    );
   }
 
   // Dashboard metrics (for managers/HR)
-  async getDailyMetrics(date?: string): Promise<DailyAttendanceMetrics> {
+  async getDashboardMetrics(date?: string): Promise<{
+    date: string;
+    total_employees: number;
+    checked_in: number;
+    not_checked_in: number;
+    present: number;
+    absent: number;
+    late: number;
+    pending: number;
+    records: AttendanceRecord[];
+  }> {
     const query = date ? `?date=${date}` : "";
-    return this.request(`/attendance/metrics/daily${query}`);
+    return this.request(`/attendance/dashboard${query}`);
   }
 
-  async getDashboardMetrics(): Promise<AttendanceDashboardMetrics> {
-    return this.request("/attendance/metrics/dashboard");
+  async getDailyMetrics(date: string): Promise<DailyAttendanceMetrics> {
+    const dashboard = await this.getDashboardMetrics(date);
+    return {
+      date: dashboard.date,
+      total_employees: dashboard.total_employees,
+      checked_in: dashboard.checked_in,
+      not_checked_in: dashboard.not_checked_in,
+      on_leave: 0, // Not provided by backend, would need leave service integration
+      late_arrivals: dashboard.late,
+      attendance_rate: (dashboard.checked_in / dashboard.total_employees) * 100,
+    };
   }
 
   // Team attendance (for managers)
@@ -267,38 +289,33 @@ export class AttendanceAPI {
     page?: number;
     page_size?: number;
   }): Promise<{ records: AttendanceRecord[]; total: number }> {
-    const query = new URLSearchParams();
-    if (params?.date) query.append("date", params.date);
-    if (params?.status) query.append("status", params.status);
-    if (params?.page) query.append("page", params.page.toString());
-    if (params?.page_size)
-      query.append("page_size", params.page_size.toString());
+    // Use dashboard endpoint and filter results
+    const date = params?.date || new Date().toISOString().split("T")[0];
+    const dashboard = await this.getDashboardMetrics(date);
 
-    return this.request(`/attendance/team?${query.toString()}`);
+    let records = dashboard.records;
+
+    // Apply status filter if provided
+    if (params?.status && params.status !== "all") {
+      records = records.filter((r) => r.status === params.status);
+    }
+
+    // Apply pagination
+    const page = params?.page || 1;
+    const pageSize = params?.page_size || 20;
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+    const paginatedRecords = records.slice(start, end);
+
+    return {
+      records: paginatedRecords,
+      total: records.length,
+    };
   }
 
-  // All attendance (for HR Admin/Manager)
-  async getAllAttendance(params?: {
-    date?: string;
-    status?: string;
-    search?: string;
-    page?: number;
-    page_size?: number;
-  }): Promise<{
-    records: AttendanceRecord[];
-    total: number;
-    page: number;
-    page_size: number;
-  }> {
-    const query = new URLSearchParams();
-    if (params?.date) query.append("date", params.date);
-    if (params?.status) query.append("status", params.status);
-    if (params?.search) query.append("search", params.search);
-    if (params?.page) query.append("page", params.page.toString());
-    if (params?.page_size)
-      query.append("page_size", params.page_size.toString());
-
-    return this.request(`/attendance/all?${query.toString()}`);
+  // Get specific attendance record
+  async getAttendanceRecord(attendanceId: number): Promise<AttendanceRecord> {
+    return this.request<AttendanceRecord>(`/attendance/${attendanceId}`);
   }
 }
 

@@ -1,12 +1,22 @@
 import { useEffect, useState } from "react";
-import { useLeaveAPI } from "@/lib/api/leave";
-import type { LeaveRecord, TeamLeaveCalendar } from "@/lib/api/leave";
+import {
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Calendar,
+  User,
+  FileText,
+  RefreshCw,
+  AlertCircle,
+} from "lucide-react";
+import { format } from "date-fns";
+
 import {
   DashboardLayout,
   PageHeader,
   PageContent,
-  PageSection,
 } from "@/components/dashboard-layout";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -14,32 +24,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/use-toast";
-import {
-  Calendar as CalendarIcon,
-  CheckCircle2,
-  XCircle,
-  Clock,
-  Users,
-  FileText,
-  AlertCircle,
-  Mail,
-  Phone,
-} from "lucide-react";
-import { format, parseISO } from "date-fns";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   Table,
@@ -49,42 +40,64 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import type { LeaveRecord } from "@/lib/api/leave";
+import { useLeaveAPI } from "@/lib/api/leave";
+import { Skeleton } from "@/components/ui/skeleton";
+
+function getLeaveTypeBadgeClass(type: string) {
+  switch (type) {
+    case "annual":
+      return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
+    case "sick":
+      return "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400";
+    case "casual":
+      return "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400";
+    case "maternity":
+      return "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400";
+    case "paternity":
+      return "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400";
+    case "unpaid":
+      return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400";
+    default:
+      return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400";
+  }
+}
 
 export default function LeaveApprovalsPage() {
   const leaveAPI = useLeaveAPI();
   const { toast } = useToast();
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [pendingLeaves, setPendingLeaves] = useState<LeaveRecord[]>([]);
-  const [teamCalendar, setTeamCalendar] = useState<TeamLeaveCalendar | null>(
-    null,
-  );
   const [selectedLeave, setSelectedLeave] = useState<LeaveRecord | null>(null);
   const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false);
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [approvalNotes, setApprovalNotes] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalRecords, setTotalRecords] = useState(0);
-
-  const pageSize = 10;
 
   useEffect(() => {
     loadPendingLeaves();
-    loadTeamCalendar();
-  }, [currentPage]);
+  }, []);
 
-  const loadPendingLeaves = async () => {
-    setLoading(true);
+  const loadPendingLeaves = async (showRefreshing = false) => {
+    if (showRefreshing) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
+
     try {
-      const response = await leaveAPI.getPendingApprovals({
-        page: currentPage,
-        page_size: pageSize,
+      const leaves = await leaveAPI.getPendingApprovals({
+        limit: 100,
       });
 
-      setPendingLeaves(response.leaves);
-      setTotalRecords(response.total);
+      setPendingLeaves(leaves);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -93,19 +106,7 @@ export default function LeaveApprovalsPage() {
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const loadTeamCalendar = async () => {
-    try {
-      const now = new Date();
-      const calendar = await leaveAPI.getTeamCalendar(
-        now.getMonth() + 1,
-        now.getFullYear(),
-      );
-      setTeamCalendar(calendar);
-    } catch (error: any) {
-      console.error("Failed to load team calendar:", error);
+      setRefreshing(false);
     }
   };
 
@@ -127,8 +128,7 @@ export default function LeaveApprovalsPage() {
       setIsApproveDialogOpen(false);
       setApprovalNotes("");
       setSelectedLeave(null);
-      await loadPendingLeaves();
-      await loadTeamCalendar();
+      await loadPendingLeaves(true);
     } catch (error: any) {
       toast({
         title: "Approval Failed",
@@ -162,7 +162,7 @@ export default function LeaveApprovalsPage() {
       setIsRejectDialogOpen(false);
       setRejectionReason("");
       setSelectedLeave(null);
-      await loadPendingLeaves();
+      await loadPendingLeaves(true);
     } catch (error: any) {
       toast({
         title: "Rejection Failed",
@@ -184,35 +184,20 @@ export default function LeaveApprovalsPage() {
     setIsRejectDialogOpen(true);
   };
 
-  const getLeaveTypeColor = (type: string) => {
-    const colors: Record<string, string> = {
-      annual: "bg-blue-500/10 text-blue-700 border-blue-200",
-      sick: "bg-red-500/10 text-red-700 border-red-200",
-      casual: "bg-green-500/10 text-green-700 border-green-200",
-      maternity: "bg-purple-500/10 text-purple-700 border-purple-200",
-      paternity: "bg-indigo-500/10 text-indigo-700 border-indigo-200",
-      unpaid: "bg-orange-500/10 text-orange-700 border-orange-200",
-      other: "bg-gray-500/10 text-gray-700 border-gray-200",
-    };
-    return colors[type] || "bg-gray-500/10 text-gray-700 border-gray-200";
-  };
-
-  const totalPages = Math.ceil(totalRecords / pageSize);
-
-  if (loading && !teamCalendar) {
+  // Loading state
+  if (loading && pendingLeaves.length === 0) {
     return (
       <DashboardLayout>
         <PageHeader
           title="Leave Approvals"
-          description="Review and manage team leave requests"
-          icon={<Clock className="size-7" />}
+          icon={<Clock className="size-5" />}
         />
         <PageContent>
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Skeleton className="h-32" />
-              <Skeleton className="h-32" />
-              <Skeleton className="h-32" />
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-4">
+              {[...Array(3)].map((_, i) => (
+                <Skeleton key={i} className="h-28" />
+              ))}
             </div>
             <Skeleton className="h-96 w-full" />
           </div>
@@ -225,412 +210,291 @@ export default function LeaveApprovalsPage() {
     <DashboardLayout>
       <PageHeader
         title="Leave Approvals"
-        description="Review and manage team leave requests"
-        icon={<Clock className="size-7" />}
-      />
+        description="Review and approve leave requests from your team"
+        icon={<Clock className="size-8" />}
+      >
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => loadPendingLeaves(true)}
+          disabled={refreshing}
+        >
+          <RefreshCw
+            className={`size-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
+          />
+          Refresh
+        </Button>
+      </PageHeader>
 
       <PageContent>
-        <PageSection>
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="space-y-6">
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card>
-              <CardHeader className="pb-3">
-                <CardDescription className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-amber-600" />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
                   Pending Approvals
-                </CardDescription>
-                <CardTitle className="text-4xl font-bold">
-                  {totalRecords}
                 </CardTitle>
+                <Clock className="size-4 text-yellow-500" />
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">
+                <div className="text-2xl font-bold">{pendingLeaves.length}</div>
+                <p className="text-xs text-muted-foreground">
                   Awaiting your review
                 </p>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader className="pb-3">
-                <CardDescription className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-indigo-600" />
-                  On Leave Today
-                </CardDescription>
-                <CardTitle className="text-4xl font-bold text-indigo-600">
-                  {teamCalendar?.total_on_leave_today || 0}
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Urgent Requests
                 </CardTitle>
+                <AlertCircle className="size-4 text-orange-500" />
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Team members away
+                <div className="text-2xl font-bold">
+                  {
+                    pendingLeaves.filter((leave) => {
+                      const startDate = new Date(leave.start_date);
+                      const today = new Date();
+                      const diffDays = Math.ceil(
+                        (startDate.getTime() - today.getTime()) /
+                          (1000 * 60 * 60 * 24),
+                      );
+                      return diffDays <= 7;
+                    }).length
+                  }
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Starting within 7 days
                 </p>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader className="pb-3">
-                <CardDescription className="flex items-center gap-2">
-                  <CalendarIcon className="h-4 w-4 text-blue-600" />
-                  Upcoming Leaves
-                </CardDescription>
-                <CardTitle className="text-4xl font-bold text-blue-600">
-                  {teamCalendar?.events.filter((e) => e.status === "approved")
-                    .length || 0}
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Total Days Requested
                 </CardTitle>
+                <Calendar className="size-4 text-blue-500" />
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">This month</p>
+                <div className="text-2xl font-bold">
+                  {pendingLeaves.reduce(
+                    (sum, leave) => sum + leave.number_of_days,
+                    0,
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Across all pending requests
+                </p>
               </CardContent>
             </Card>
           </div>
-        </PageSection>
 
-        <PageSection delay={1}>
-          {/* Main Content Tabs */}
-          <Tabs defaultValue="pending" className="space-y-6">
-            <TabsList className="grid w-full max-w-md grid-cols-2">
-              <TabsTrigger value="pending" className="gap-2">
-                <Clock className="h-4 w-4" />
-                Pending Requests
-              </TabsTrigger>
-              <TabsTrigger value="calendar" className="gap-2">
-                <CalendarIcon className="h-4 w-4" />
-                Team Calendar
-              </TabsTrigger>
-            </TabsList>
+          {/* Pending Requests Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Pending Leave Requests</CardTitle>
+              <CardDescription>
+                Review and take action on leave requests from your team members
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {pendingLeaves.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <CheckCircle2 className="size-12 text-green-500 mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">All Caught Up!</h3>
+                  <p className="text-sm text-muted-foreground">
+                    There are no pending leave requests at the moment
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Employee</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Period</TableHead>
+                        <TableHead>Days</TableHead>
+                        <TableHead>Reason</TableHead>
+                        <TableHead>Applied On</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {pendingLeaves.map((leave) => {
+                        const startDate = new Date(leave.start_date);
+                        const today = new Date();
+                        const diffDays = Math.ceil(
+                          (startDate.getTime() - today.getTime()) /
+                            (1000 * 60 * 60 * 24),
+                        );
+                        const isUrgent = diffDays <= 7 && diffDays >= 0;
 
-            {/* Pending Requests Tab */}
-            <TabsContent value="pending" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        <FileText className="h-5 w-5" />
-                        Pending Leave Requests
-                      </CardTitle>
-                      <CardDescription>
-                        Review and action pending leave requests from your team
-                      </CardDescription>
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Total: {totalRecords} requests
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="border rounded-lg overflow-hidden">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Employee</TableHead>
-                          <TableHead>Type</TableHead>
-                          <TableHead>Start Date</TableHead>
-                          <TableHead>End Date</TableHead>
-                          <TableHead>Days</TableHead>
-                          <TableHead className="hidden lg:table-cell">
-                            Reason
-                          </TableHead>
-                          <TableHead>Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {loading ? (
-                          <TableRow>
-                            <TableCell
-                              colSpan={7}
-                              className="text-center py-12"
-                            >
-                              <div className="flex items-center justify-center gap-2">
-                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                                <span className="text-muted-foreground">
-                                  Loading...
+                        return (
+                          <TableRow key={leave.id}>
+                            <TableCell>
+                              <div className="flex flex-col">
+                                <span className="font-medium">
+                                  {leave.employee_name}
                                 </span>
+                                {leave.employee_email && (
+                                  <span className="text-xs text-muted-foreground">
+                                    {leave.employee_email}
+                                  </span>
+                                )}
                               </div>
                             </TableCell>
-                          </TableRow>
-                        ) : pendingLeaves.length === 0 ? (
-                          <TableRow>
-                            <TableCell
-                              colSpan={7}
-                              className="text-center py-12"
-                            >
-                              <div className="flex flex-col items-center gap-3">
-                                <CheckCircle2 className="h-16 w-16 text-emerald-500/30" />
-                                <div className="space-y-1">
-                                  <p className="font-medium text-lg">
-                                    All caught up!
-                                  </p>
-                                  <p className="text-sm text-muted-foreground">
-                                    No pending leave requests
-                                  </p>
-                                </div>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ) : (
-                          pendingLeaves.map((leave) => (
-                            <TableRow
-                              key={leave.id}
-                              className="hover:bg-muted/50 transition-colors"
-                            >
-                              <TableCell>
-                                <div className="space-y-1">
-                                  <p className="font-medium">
-                                    {leave.employee_name}
-                                  </p>
-                                  {leave.employee_email && (
-                                    <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                      <Mail className="h-3 w-3" />
-                                      {leave.employee_email}
-                                    </p>
-                                  )}
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <Badge
-                                  className={getLeaveTypeColor(
-                                    leave.leave_type,
-                                  )}
-                                  variant="outline"
-                                >
-                                  {leave.leave_type}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="font-mono text-sm tabular-nums">
-                                {format(
-                                  parseISO(leave.start_date),
-                                  "MMM d, yyyy",
-                                )}
-                              </TableCell>
-                              <TableCell className="font-mono text-sm tabular-nums">
-                                {format(
-                                  parseISO(leave.end_date),
-                                  "MMM d, yyyy",
-                                )}
-                              </TableCell>
-                              <TableCell className="font-semibold tabular-nums">
-                                {leave.number_of_days}
-                              </TableCell>
-                              <TableCell className="hidden lg:table-cell max-w-[200px]">
-                                <p
-                                  className="truncate text-sm"
-                                  title={leave.reason}
-                                >
-                                  {leave.reason}
-                                </p>
-                                {leave.contact_info && (
-                                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                                    <Phone className="h-3 w-3" />
-                                    {leave.contact_info}
-                                  </p>
-                                )}
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex items-center gap-2">
-                                  <Button
-                                    size="sm"
-                                    onClick={() => openApproveDialog(leave)}
-                                    className="bg-emerald-600 hover:bg-emerald-700"
-                                  >
-                                    <CheckCircle2 className="h-4 w-4 mr-1" />
-                                    <span className="hidden sm:inline">
-                                      Approve
-                                    </span>
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    onClick={() => openRejectDialog(leave)}
-                                  >
-                                    <XCircle className="h-4 w-4 mr-1" />
-                                    <span className="hidden sm:inline">
-                                      Reject
-                                    </span>
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))
-                        )}
-                      </TableBody>
-                    </Table>
-                  </div>
-
-                  {/* Pagination */}
-                  {totalPages > 1 && (
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4">
-                      <p className="text-sm text-muted-foreground tabular-nums">
-                        Showing {(currentPage - 1) * pageSize + 1} to{" "}
-                        {Math.min(currentPage * pageSize, totalRecords)} of{" "}
-                        {totalRecords} requests
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            setCurrentPage((p) => Math.max(1, p - 1))
-                          }
-                          disabled={currentPage === 1}
-                        >
-                          Previous
-                        </Button>
-                        <div className="flex items-center gap-1">
-                          {Array.from(
-                            { length: Math.min(5, totalPages) },
-                            (_, i) => {
-                              const page = i + 1;
-                              return (
-                                <Button
-                                  key={page}
-                                  variant={
-                                    currentPage === page ? "default" : "outline"
-                                  }
-                                  size="sm"
-                                  onClick={() => setCurrentPage(page)}
-                                  className="w-10 tabular-nums"
-                                >
-                                  {page}
-                                </Button>
-                              );
-                            },
-                          )}
-                          {totalPages > 5 && (
-                            <span className="text-muted-foreground px-2">
-                              ...
-                            </span>
-                          )}
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            setCurrentPage((p) => Math.min(totalPages, p + 1))
-                          }
-                          disabled={currentPage === totalPages}
-                        >
-                          Next
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Team Calendar Tab */}
-            <TabsContent value="calendar" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CalendarIcon className="h-5 w-5" />
-                    Team Leave Calendar
-                  </CardTitle>
-                  <CardDescription>
-                    View approved and upcoming leaves for your team
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {teamCalendar && teamCalendar.events.length > 0 ? (
-                    <div className="space-y-3">
-                      {teamCalendar.events.map((event, index) => (
-                        <div
-                          key={index}
-                          className="flex items-start justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                        >
-                          <div className="space-y-1 flex-1">
-                            <div className="flex items-center gap-2">
-                              <p className="font-medium">
-                                {event.employee_name}
-                              </p>
+                            <TableCell>
                               <Badge
                                 variant="outline"
-                                className={getLeaveTypeColor(event.leave_type)}
+                                className={getLeaveTypeBadgeClass(
+                                  leave.leave_type,
+                                )}
                               >
-                                {event.leave_type}
+                                {leave.leave_type}
                               </Badge>
-                              <Badge
-                                variant={
-                                  event.status === "approved"
-                                    ? "default"
-                                    : "secondary"
-                                }
-                              >
-                                {event.status}
-                              </Badge>
-                            </div>
-                            <div className="text-sm text-muted-foreground flex items-center gap-4">
-                              <span className="font-mono tabular-nums">
-                                {format(parseISO(event.start_date), "MMM d")} -{" "}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-col">
+                                <span className="text-sm font-medium">
+                                  {format(
+                                    new Date(leave.start_date),
+                                    "MMM dd, yyyy",
+                                  )}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  to{" "}
+                                  {format(
+                                    new Date(leave.end_date),
+                                    "MMM dd, yyyy",
+                                  )}
+                                </span>
+                                {isUrgent && (
+                                  <Badge
+                                    variant="outline"
+                                    className="mt-1 bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400 w-fit"
+                                  >
+                                    <AlertCircle className="size-3 mr-1" />
+                                    Urgent
+                                  </Badge>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <span className="font-semibold tabular-nums">
+                                {leave.number_of_days}
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              <span className="text-sm line-clamp-2 max-w-xs">
+                                {leave.reason}
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              <span className="text-sm text-muted-foreground">
                                 {format(
-                                  parseISO(event.end_date),
-                                  "MMM d, yyyy",
+                                  new Date(leave.created_at),
+                                  "MMM dd, yyyy",
                                 )}
                               </span>
-                              <span>•</span>
-                              <span>{event.days} days</span>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-12">
-                      <CalendarIcon className="h-16 w-16 text-muted-foreground/30 mb-4" />
-                      <p className="text-muted-foreground">
-                        No upcoming leaves scheduled
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </PageSection>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="default"
+                                  onClick={() => openApproveDialog(leave)}
+                                  className="bg-green-600 hover:bg-green-700"
+                                >
+                                  <CheckCircle2 className="size-4 mr-1" />
+                                  Approve
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => openRejectDialog(leave)}
+                                >
+                                  <XCircle className="size-4 mr-1" />
+                                  Reject
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </PageContent>
 
       {/* Approve Dialog */}
       <Dialog open={isApproveDialogOpen} onOpenChange={setIsApproveDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-              Approve Leave Request
-            </DialogTitle>
+            <DialogTitle>Approve Leave Request</DialogTitle>
             <DialogDescription>
-              Approve leave request for {selectedLeave?.employee_name}
+              Confirm approval for {selectedLeave?.employee_name}'s leave
+              request
             </DialogDescription>
           </DialogHeader>
 
           {selectedLeave && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
-                <div>
-                  <p className="text-sm text-muted-foreground">Leave Type</p>
+              <div className="rounded-lg border p-4 space-y-2">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <User className="size-4 text-muted-foreground" />
+                      <span className="font-semibold">
+                        {selectedLeave.employee_name}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="size-4 text-muted-foreground" />
+                      <span className="text-sm">
+                        {format(
+                          new Date(selectedLeave.start_date),
+                          "MMM dd, yyyy",
+                        )}{" "}
+                        -{" "}
+                        {format(
+                          new Date(selectedLeave.end_date),
+                          "MMM dd, yyyy",
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="size-4 text-muted-foreground" />
+                      <span className="text-sm">
+                        {selectedLeave.number_of_days} day(s)
+                      </span>
+                    </div>
+                  </div>
                   <Badge
-                    className={getLeaveTypeColor(selectedLeave.leave_type)}
                     variant="outline"
+                    className={getLeaveTypeBadgeClass(selectedLeave.leave_type)}
                   >
                     {selectedLeave.leave_type}
                   </Badge>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Duration</p>
-                  <p className="font-semibold">
-                    {selectedLeave.number_of_days} days
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-sm text-muted-foreground">Period</p>
-                  <p className="font-mono text-sm">
-                    {format(parseISO(selectedLeave.start_date), "MMM d")} -{" "}
-                    {format(parseISO(selectedLeave.end_date), "MMM d, yyyy")}
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-sm text-muted-foreground">Reason</p>
-                  <p className="text-sm">{selectedLeave.reason}</p>
+                <div className="pt-2 border-t">
+                  <div className="flex items-start gap-2">
+                    <FileText className="size-4 text-muted-foreground mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium mb-1">Reason:</p>
+                      <p className="text-sm text-muted-foreground">
+                        {selectedLeave.reason}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -640,9 +504,9 @@ export default function LeaveApprovalsPage() {
                 </Label>
                 <Textarea
                   id="approval-notes"
-                  placeholder="Add any notes or comments..."
                   value={approvalNotes}
                   onChange={(e) => setApprovalNotes(e.target.value)}
+                  placeholder="Add any notes or comments for this approval..."
                   rows={3}
                 />
               </div>
@@ -652,7 +516,11 @@ export default function LeaveApprovalsPage() {
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setIsApproveDialogOpen(false)}
+              onClick={() => {
+                setIsApproveDialogOpen(false);
+                setApprovalNotes("");
+                setSelectedLeave(null);
+              }}
               disabled={isProcessing}
             >
               Cancel
@@ -660,9 +528,19 @@ export default function LeaveApprovalsPage() {
             <Button
               onClick={handleApprove}
               disabled={isProcessing}
-              className="bg-emerald-600 hover:bg-emerald-700"
+              className="bg-green-600 hover:bg-green-700"
             >
-              {isProcessing ? "Approving..." : "Approve Leave"}
+              {isProcessing ? (
+                <>
+                  <RefreshCw className="size-4 mr-2 animate-spin" />
+                  Approving...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="size-4 mr-2" />
+                  Approve Leave
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -672,53 +550,65 @@ export default function LeaveApprovalsPage() {
       <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <XCircle className="h-5 w-5 text-destructive" />
-              Reject Leave Request
-            </DialogTitle>
+            <DialogTitle>Reject Leave Request</DialogTitle>
             <DialogDescription>
-              Reject leave request for {selectedLeave?.employee_name}
+              Provide a reason for rejecting {selectedLeave?.employee_name}'s
+              leave request
             </DialogDescription>
           </DialogHeader>
 
           {selectedLeave && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
-                <div>
-                  <p className="text-sm text-muted-foreground">Leave Type</p>
+              <div className="rounded-lg border border-red-200 bg-red-50 dark:bg-red-900/10 dark:border-red-900/30 p-4 space-y-2">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <User className="size-4 text-muted-foreground" />
+                      <span className="font-semibold">
+                        {selectedLeave.employee_name}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="size-4 text-muted-foreground" />
+                      <span className="text-sm">
+                        {format(
+                          new Date(selectedLeave.start_date),
+                          "MMM dd, yyyy",
+                        )}{" "}
+                        -{" "}
+                        {format(
+                          new Date(selectedLeave.end_date),
+                          "MMM dd, yyyy",
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="size-4 text-muted-foreground" />
+                      <span className="text-sm">
+                        {selectedLeave.number_of_days} day(s)
+                      </span>
+                    </div>
+                  </div>
                   <Badge
-                    className={getLeaveTypeColor(selectedLeave.leave_type)}
                     variant="outline"
+                    className={getLeaveTypeBadgeClass(selectedLeave.leave_type)}
                   >
                     {selectedLeave.leave_type}
                   </Badge>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Duration</p>
-                  <p className="font-semibold">
-                    {selectedLeave.number_of_days} days
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-sm text-muted-foreground">Period</p>
-                  <p className="font-mono text-sm">
-                    {format(parseISO(selectedLeave.start_date), "MMM d")} -{" "}
-                    {format(parseISO(selectedLeave.end_date), "MMM d, yyyy")}
-                  </p>
-                </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="rejection-reason" className="text-destructive">
-                  Rejection Reason (Required) *
+                <Label htmlFor="rejection-reason">
+                  Rejection Reason <span className="text-red-500">*</span>
                 </Label>
                 <Textarea
                   id="rejection-reason"
-                  placeholder="Please provide a clear reason for rejection..."
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
+                  placeholder="Please provide a clear reason for rejecting this leave request..."
                   rows={4}
-                  className="border-destructive focus-visible:ring-destructive"
+                  required
                 />
                 <p className="text-xs text-muted-foreground">
                   This reason will be shared with the employee
@@ -730,7 +620,11 @@ export default function LeaveApprovalsPage() {
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setIsRejectDialogOpen(false)}
+              onClick={() => {
+                setIsRejectDialogOpen(false);
+                setRejectionReason("");
+                setSelectedLeave(null);
+              }}
               disabled={isProcessing}
             >
               Cancel
@@ -740,7 +634,17 @@ export default function LeaveApprovalsPage() {
               onClick={handleReject}
               disabled={isProcessing || !rejectionReason.trim()}
             >
-              {isProcessing ? "Rejecting..." : "Reject Leave"}
+              {isProcessing ? (
+                <>
+                  <RefreshCw className="size-4 mr-2 animate-spin" />
+                  Rejecting...
+                </>
+              ) : (
+                <>
+                  <XCircle className="size-4 mr-2" />
+                  Reject Leave
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

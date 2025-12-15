@@ -1,28 +1,33 @@
-// My Leaves Page
-// Personal leave management with application and tracking
-// Shows leave balances, history, and allows applying for new leaves
-
 import { useEffect, useState } from "react";
-import { useLeaveAPI } from "@/lib/api/leave";
-import type { LeaveRecord, LeaveSummary } from "@/lib/api/leave";
+import {
+  CalendarDays,
+  Plus,
+  RefreshCw,
+  Filter,
+  X,
+  Clock,
+  AlertCircle,
+  CheckCircle2,
+  XCircle,
+  Ban,
+} from "lucide-react";
+import { differenceInDays, format } from "date-fns";
+
 import {
   DashboardLayout,
   PageHeader,
   PageContent,
-  PageSection,
 } from "@/components/dashboard-layout";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -30,33 +35,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/use-toast";
-import { useAsgardeo } from "@asgardeo/react";
-import {
-  CalendarDays,
-  Plus,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-  Palmtree,
-  X,
-  RefreshCw,
-  Filter,
-  FileText,
-  Calendar,
-} from "lucide-react";
-import { format, parseISO, differenceInDays } from "date-fns";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -65,52 +48,77 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
+import type { LeaveRecord } from "@/lib/api/leave";
+import { useLeaveAPI } from "@/lib/api/leave";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
-// Status badge styling - consistent with design system
-function getStatusBadgeClass(status: string): string {
+function getStatusBadgeClass(status: string) {
   switch (status) {
     case "approved":
-      return "status-success";
-    case "pending":
-      return "status-warning";
+      return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
     case "rejected":
-      return "status-error";
+      return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
+    case "pending":
+      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400";
     case "cancelled":
-      return "status-neutral";
+      return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400";
     default:
-      return "status-neutral";
+      return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400";
   }
 }
 
-// Leave type badge styling
-function getLeaveTypeBadgeClass(type: string): string {
+function getLeaveTypeBadgeClass(type: string) {
   switch (type) {
     case "annual":
-      return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20";
+      return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
     case "sick":
-      return "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20";
+      return "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400";
     case "casual":
-      return "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20";
+      return "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400";
     case "maternity":
-      return "bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20";
+      return "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400";
     case "paternity":
-      return "bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-500/20";
+      return "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400";
     case "unpaid":
-      return "bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20";
+      return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400";
     default:
-      return "bg-muted text-muted-foreground";
+      return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400";
+  }
+}
+
+function getStatusIcon(status: string) {
+  switch (status) {
+    case "approved":
+      return <CheckCircle2 className="size-4" />;
+    case "rejected":
+      return <XCircle className="size-4" />;
+    case "pending":
+      return <Clock className="size-4" />;
+    case "cancelled":
+      return <Ban className="size-4" />;
+    default:
+      return <AlertCircle className="size-4" />;
   }
 }
 
 export default function LeavePage() {
   const leaveAPI = useLeaveAPI();
-  const { getDecodedIdToken } = useAsgardeo();
   const { toast } = useToast();
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [myLeaves, setMyLeaves] = useState<LeaveRecord[]>([]);
-  const [leaveSummary, setLeaveSummary] = useState<LeaveSummary | null>(null);
   const [isApplyDialogOpen, setIsApplyDialogOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
@@ -122,32 +130,13 @@ export default function LeavePage() {
   const [contactInfo, setContactInfo] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [employeeId, setEmployeeId] = useState<string>("");
+  // Cancel dialog state
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [leaveToCancel, setLeaveToCancel] = useState<string | null>(null);
 
   useEffect(() => {
-    const initializeEmployee = async () => {
-      try {
-        const decodedToken = await getDecodedIdToken();
-        const id = (decodedToken?.sub as string) || "";
-        setEmployeeId(id);
-      } catch (error) {
-        console.error("Failed to get employee ID:", error);
-        toast({
-          title: "Error",
-          description: "Failed to initialize employee information",
-          variant: "destructive",
-        });
-      }
-    };
-
-    initializeEmployee();
-  }, [getDecodedIdToken, toast]);
-
-  useEffect(() => {
-    if (employeeId) {
-      loadLeaveData();
-    }
-  }, [employeeId, statusFilter]);
+    loadLeaveData();
+  }, [statusFilter]);
 
   const loadLeaveData = async (showRefreshing = false) => {
     if (showRefreshing) {
@@ -157,17 +146,12 @@ export default function LeavePage() {
     }
 
     try {
-      const [leaves, summary] = await Promise.all([
-        leaveAPI.getMyLeaves({
-          status: statusFilter === "all" ? undefined : statusFilter,
-          page: 1,
-          page_size: 50,
-        }),
-        leaveAPI.getMyBalance(),
-      ]);
+      const leaves = await leaveAPI.getMyLeaves({
+        status: statusFilter === "all" ? undefined : statusFilter,
+        limit: 100,
+      });
 
-      setMyLeaves(leaves.leaves);
-      setLeaveSummary(summary);
+      setMyLeaves(leaves);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -205,7 +189,6 @@ export default function LeavePage() {
     setIsSubmitting(true);
     try {
       await leaveAPI.applyLeave({
-        employee_id: employeeId,
         leave_type: leaveType as any,
         start_date: startDate,
         end_date: endDate,
@@ -232,13 +215,17 @@ export default function LeavePage() {
     }
   };
 
-  const handleCancelLeave = async (leaveId: string) => {
+  const handleCancelLeave = async () => {
+    if (!leaveToCancel) return;
+
     try {
-      await leaveAPI.cancelLeave(leaveId);
+      await leaveAPI.cancelLeave(leaveToCancel);
       toast({
         title: "Leave Cancelled",
         description: "Your leave request has been cancelled",
       });
+      setCancelDialogOpen(false);
+      setLeaveToCancel(null);
       await loadLeaveData(true);
     } catch (error: any) {
       toast({
@@ -247,6 +234,11 @@ export default function LeavePage() {
         variant: "destructive",
       });
     }
+  };
+
+  const openCancelDialog = (leaveId: string) => {
+    setLeaveToCancel(leaveId);
+    setCancelDialogOpen(true);
   };
 
   const resetForm = () => {
@@ -265,8 +257,16 @@ export default function LeavePage() {
     return 0;
   };
 
+  // Calculate summary stats
+  const stats = {
+    total: myLeaves.length,
+    pending: myLeaves.filter((l) => l.status === "pending").length,
+    approved: myLeaves.filter((l) => l.status === "approved").length,
+    rejected: myLeaves.filter((l) => l.status === "rejected").length,
+  };
+
   // Loading state
-  if (loading && !leaveSummary) {
+  if (loading && myLeaves.length === 0) {
     return (
       <DashboardLayout>
         <PageHeader
@@ -291,7 +291,7 @@ export default function LeavePage() {
     <DashboardLayout>
       <PageHeader
         title="My Leaves"
-        description="Manage your leave requests and track balances"
+        description="Manage your leave requests and track your leave history"
         icon={<CalendarDays className="size-8" />}
       >
         <div className="flex items-center gap-2">
@@ -312,9 +312,10 @@ export default function LeavePage() {
               <Button className="gap-2">
                 <Plus className="size-4" />
                 <span className="hidden sm:inline">Apply for Leave</span>
+                <span className="sm:hidden">Apply</span>
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle className="text-xl">Apply for Leave</DialogTitle>
                 <DialogDescription>
@@ -403,23 +404,20 @@ export default function LeavePage() {
                   />
                 </div>
               </div>
+
               <DialogFooter>
                 <Button
                   variant="outline"
-                  onClick={() => setIsApplyDialogOpen(false)}
+                  onClick={() => {
+                    setIsApplyDialogOpen(false);
+                    resetForm();
+                  }}
                   disabled={isSubmitting}
                 >
                   Cancel
                 </Button>
                 <Button onClick={handleApplyLeave} disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <>
-                      <RefreshCw className="size-4 mr-2 animate-spin" />
-                      Submitting...
-                    </>
-                  ) : (
-                    "Submit Request"
-                  )}
+                  {isSubmitting ? "Submitting..." : "Submit Request"}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -428,157 +426,123 @@ export default function LeavePage() {
       </PageHeader>
 
       <PageContent>
-        {/* Leave Balance Cards */}
-        <PageSection delay={1}>
+        <div className="space-y-6">
+          {/* Summary Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className=" hover-lift">
-              <CardHeader className="pb-2">
-                <CardDescription className="flex items-center gap-2 text-xs uppercase tracking-wider">
-                  <Palmtree className="size-4 text-blue-600" />
-                  Total Taken
-                </CardDescription>
-                <CardTitle className="text-3xl tabular-nums">
-                  {leaveSummary?.total_leaves_taken ?? 0}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Total Leaves
                 </CardTitle>
+                <CalendarDays className="size-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">Days this year</p>
+                <div className="text-2xl font-bold">{stats.total}</div>
+                <p className="text-xs text-muted-foreground">All time</p>
               </CardContent>
             </Card>
 
-            <Card className=" hover-lift">
-              <CardHeader className="pb-2">
-                <CardDescription className="flex items-center gap-2 text-xs uppercase tracking-wider">
-                  <Clock className="size-4 text-amber-600" />
-                  Pending
-                </CardDescription>
-                <CardTitle className="text-3xl tabular-nums">
-                  {leaveSummary?.total_pending ?? 0}
-                </CardTitle>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Pending</CardTitle>
+                <Clock className="size-4 text-yellow-500" />
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">
+                <div className="text-2xl font-bold">{stats.pending}</div>
+                <p className="text-xs text-muted-foreground">
                   Awaiting approval
                 </p>
               </CardContent>
             </Card>
 
-            <Card className=" hover-lift">
-              <CardHeader className="pb-2">
-                <CardDescription className="flex items-center gap-2 text-xs uppercase tracking-wider">
-                  <CheckCircle2 className="size-4 text-emerald-600" />
-                  Approved
-                </CardDescription>
-                <CardTitle className="text-3xl tabular-nums">
-                  {leaveSummary?.total_approved ?? 0}
-                </CardTitle>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Approved</CardTitle>
+                <CheckCircle2 className="size-4 text-green-500" />
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">This year</p>
+                <div className="text-2xl font-bold">{stats.approved}</div>
+                <p className="text-xs text-muted-foreground">Granted leaves</p>
               </CardContent>
             </Card>
 
-            <Card className=" hover-lift">
-              <CardHeader className="pb-2">
-                <CardDescription className="flex items-center gap-2 text-xs uppercase tracking-wider">
-                  <AlertCircle className="size-4 text-rose-600" />
-                  Rejected
-                </CardDescription>
-                <CardTitle className="text-3xl tabular-nums">
-                  {leaveSummary?.total_rejected ?? 0}
-                </CardTitle>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Rejected</CardTitle>
+                <XCircle className="size-4 text-red-500" />
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">This year</p>
+                <div className="text-2xl font-bold">{stats.rejected}</div>
+                <p className="text-xs text-muted-foreground">Declined</p>
               </CardContent>
             </Card>
           </div>
-        </PageSection>
 
-        {/* Leave History */}
-        <PageSection delay={2}>
+          {/* Leave Requests Table */}
           <Card>
             <CardHeader>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="size-5" />
-                    Leave History
-                  </CardTitle>
-                  <CardDescription>
-                    View and manage your leave requests
-                  </CardDescription>
-                </div>
+              <div className="flex items-center justify-between">
+                <CardTitle>Leave Requests</CardTitle>
                 <div className="flex items-center gap-2">
                   <Filter className="size-4 text-muted-foreground" />
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-[150px]">
-                      <SelectValue placeholder="Filter by status" />
+                    <SelectTrigger className="w-40">
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Statuses</SelectItem>
+                      <SelectItem value="all">All Status</SelectItem>
                       <SelectItem value="pending">Pending</SelectItem>
                       <SelectItem value="approved">Approved</SelectItem>
                       <SelectItem value="rejected">Rejected</SelectItem>
                       <SelectItem value="cancelled">Cancelled</SelectItem>
                     </SelectContent>
                   </Select>
+                  {statusFilter !== "all" && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setStatusFilter("all")}
+                    >
+                      <X className="size-4" />
+                    </Button>
+                  )}
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <Table className="data-table">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Start Date</TableHead>
-                      <TableHead>End Date</TableHead>
-                      <TableHead>Days</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="max-w-[200px]">Reason</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {loading ? (
+            <CardContent>
+              {myLeaves.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <CalendarDays className="size-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">
+                    No Leave Requests
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {statusFilter === "all"
+                      ? "You haven't applied for any leaves yet"
+                      : `No ${statusFilter} leave requests found`}
+                  </p>
+                  <Button onClick={() => setIsApplyDialogOpen(true)}>
+                    <Plus className="size-4 mr-2" />
+                    Apply for Leave
+                  </Button>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-12">
-                          <div className="flex items-center justify-center gap-2">
-                            <RefreshCw className="size-5 animate-spin" />
-                            <span className="text-muted-foreground">
-                              Loading...
-                            </span>
-                          </div>
-                        </TableCell>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Period</TableHead>
+                        <TableHead>Days</TableHead>
+                        <TableHead>Reason</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Reviewer</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
-                    ) : myLeaves.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={7} className="text-center py-12">
-                          <div className="flex flex-col items-center gap-3">
-                            <div className="size-12 rounded-full bg-muted flex items-center justify-center">
-                              <Calendar className="size-6 text-muted-foreground" />
-                            </div>
-                            <p className="text-muted-foreground">
-                              No leave records found
-                            </p>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setIsApplyDialogOpen(true)}
-                            >
-                              Apply for Leave
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      myLeaves.map((leave, index) => (
-                        <TableRow
-                          key={leave.id}
-                          className="animate-in"
-                          style={{ animationDelay: `${index * 30}ms` }}
-                        >
+                    </TableHeader>
+                    <TableBody>
+                      {myLeaves.map((leave) => (
+                        <TableRow key={leave.id}>
                           <TableCell>
                             <Badge
                               variant="outline"
@@ -589,65 +553,97 @@ export default function LeavePage() {
                               {leave.leave_type}
                             </Badge>
                           </TableCell>
-                          <TableCell className="tabular-nums">
-                            {format(parseISO(leave.start_date), "MMM d, yyyy")}
+                          <TableCell>
+                            <div className="flex flex-col">
+                              <span className="text-sm font-medium">
+                                {format(
+                                  new Date(leave.start_date),
+                                  "MMM dd, yyyy",
+                                )}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                to{" "}
+                                {format(
+                                  new Date(leave.end_date),
+                                  "MMM dd, yyyy",
+                                )}
+                              </span>
+                            </div>
                           </TableCell>
-                          <TableCell className="tabular-nums">
-                            {format(parseISO(leave.end_date), "MMM d, yyyy")}
+                          <TableCell>
+                            <span className="font-semibold tabular-nums">
+                              {leave.number_of_days}
+                            </span>
                           </TableCell>
-                          <TableCell className="font-semibold tabular-nums">
-                            {leave.number_of_days}
+                          <TableCell>
+                            <span className="text-sm line-clamp-2 max-w-xs">
+                              {leave.reason}
+                            </span>
                           </TableCell>
                           <TableCell>
                             <Badge
                               variant="outline"
-                              className={getStatusBadgeClass(leave.status)}
+                              className={`gap-1 ${getStatusBadgeClass(leave.status)}`}
                             >
+                              {getStatusIcon(leave.status)}
                               {leave.status}
                             </Badge>
                           </TableCell>
-                          <TableCell className="max-w-[200px] truncate text-sm text-muted-foreground">
-                            {leave.reason}
+                          <TableCell>
+                            {leave.reviewer_name ? (
+                              <span className="text-sm">
+                                {leave.reviewer_name}
+                              </span>
+                            ) : (
+                              <span className="text-sm text-muted-foreground">
+                                -
+                              </span>
+                            )}
                           </TableCell>
-                          <TableCell className="text-right">
-                            {leave.status === "pending" && (
+                          <TableCell>
+                            {(leave.status === "pending" ||
+                              leave.status === "approved") && (
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleCancelLeave(leave.id)}
-                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                onClick={() => openCancelDialog(leave.id)}
                               >
-                                <X className="size-4 mr-1" />
+                                <Ban className="size-4 mr-1" />
                                 Cancel
                               </Button>
                             )}
-                            {leave.status === "rejected" &&
-                              leave.rejection_reason && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    toast({
-                                      title: "Rejection Reason",
-                                      description: leave.rejection_reason,
-                                    });
-                                  }}
-                                >
-                                  <AlertCircle className="size-4 mr-1" />
-                                  View
-                                </Button>
-                              )}
                           </TableCell>
                         </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </CardContent>
           </Card>
-        </PageSection>
+        </div>
       </PageContent>
+
+      {/* Cancel Confirmation Dialog */}
+      <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Leave Request</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel this leave request? This action
+              cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setLeaveToCancel(null)}>
+              No, Keep It
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleCancelLeave}>
+              Yes, Cancel Leave
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 }
