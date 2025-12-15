@@ -25,6 +25,7 @@ import {
   ChevronRight,
   X,
   RefreshCw,
+  User,
 } from "lucide-react";
 
 import {
@@ -123,7 +124,8 @@ function getEmploymentTypeBadgeClass(type: string): string {
 }
 
 // Get initials from name
-function getInitials(name: string): string {
+function getInitials(name: string): string | null {
+  if (!name) return null;
   return name
     .split(" ")
     .map((n) => n[0])
@@ -142,6 +144,7 @@ function getAvatarGradient(name: string): string {
     "from-rose-500 to-pink-600",
     "from-indigo-500 to-blue-600",
   ];
+  if (!name) return gradients[0];
   const hash = name
     .split("")
     .reduce((acc, char) => acc + char.charCodeAt(0), 0);
@@ -641,7 +644,9 @@ export default function EmployeesDirectory() {
                                 <AvatarFallback
                                   className={`bg-linear-to-br ${getAvatarGradient(employee.full_name)} text-white font-medium`}
                                 >
-                                  {getInitials(employee.full_name)}
+                                  {getInitials(employee.full_name) || (
+                                    <User className="size-5" />
+                                  )}
                                 </AvatarFallback>
                               </Avatar>
                               <div className="min-w-0">

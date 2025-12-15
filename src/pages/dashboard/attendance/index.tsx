@@ -28,11 +28,10 @@ import { Calendar } from "@/components/ui/calendar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { useAsgardeo } from "@asgardeo/react";
+
 import {
   Clock,
   Calendar as CalendarIcon,
-  TrendingUp,
   CheckCircle2,
   XCircle,
   Timer,
@@ -42,6 +41,7 @@ import {
   MapPin,
   RefreshCw,
 } from "lucide-react";
+import { IconTrendingUp } from "@tabler/icons-react";
 import { format, parseISO } from "date-fns";
 import {
   Bar,
@@ -88,7 +88,6 @@ const chartConfig = {
 
 export default function AttendancePage() {
   const attendanceAPI = useAttendanceAPI();
-  const { getDecodedIdToken } = useAsgardeo();
   const { toast } = useToast();
 
   const [loading, setLoading] = useState(true);
@@ -508,7 +507,7 @@ export default function AttendancePage() {
             <Card className="hover-lift">
               <CardHeader className="pb-2">
                 <CardDescription className="flex items-center gap-2 text-xs uppercase tracking-wider">
-                  <TrendingUp className="size-4 text-violet-600" />
+                  <IconTrendingUp className="size-4 text-violet-600" />
                   Overtime
                 </CardDescription>
                 <CardTitle className="text-3xl tabular-nums">

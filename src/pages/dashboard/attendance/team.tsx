@@ -38,7 +38,6 @@ import {
   Calendar,
   UserCheck,
   UserX,
-  TrendingUp,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import {

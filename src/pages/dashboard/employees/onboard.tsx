@@ -12,10 +12,6 @@ import {
  UserPlus,
  Mail,
  Briefcase,
- Building2,
- DollarSign,
- Calendar,
- Clock,
  Users,
  Info,
 } from "lucide-react";

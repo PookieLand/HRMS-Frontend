@@ -10,7 +10,6 @@ import {
   Clock,
   UserPlus,
   BarChart3,
-  Network,
   ShieldPlus,
   Monitor,
 } from "lucide-react";

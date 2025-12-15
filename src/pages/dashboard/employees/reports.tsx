@@ -32,7 +32,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -44,9 +43,9 @@ import {
   Calendar,
   Cake,
   DollarSign,
-  TrendingUp,
   AlertCircle,
 } from "lucide-react";
+import { IconTrendingUp } from "@tabler/icons-react";
 import { format, parseISO } from "date-fns";
 
 type ReportType =
@@ -266,26 +265,22 @@ export default function EmployeeReports() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-sm text-muted-foreground">
-                          Active workforce
-                        </p>
+                        <p className="text-sm text-muted-foreground">Total headcount</p>
                       </CardContent>
                     </Card>
 
                     <Card>
                       <CardHeader className="pb-3">
                         <CardDescription className="flex items-center gap-2">
-                          <TrendingUp className="h-4 w-4 text-emerald-600" />
-                          Active
+                          <IconTrendingUp className="h-4 w-4 text-emerald-600" />
+                          Employment Types
                         </CardDescription>
                         <CardTitle className="text-4xl font-bold text-emerald-600">
-                          {headcountData.active_employees}
+                          {Object.values(headcountData.by_employment_type).reduce((a, b) => a + b, 0)}
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-sm text-muted-foreground">
-                          Currently working
-                        </p>
+                        <p className="text-sm text-muted-foreground">Permanent vs Contract</p>
                       </CardContent>
                     </Card>
 
@@ -296,13 +291,11 @@ export default function EmployeeReports() {
                           On Probation
                         </CardDescription>
                         <CardTitle className="text-4xl font-bold text-amber-600">
-                          {headcountData.on_probation}
+                          {probationData?.employees_on_probation ?? probationData?.employees.length ?? "—"}
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-sm text-muted-foreground">
-                          New hires
-                        </p>
+                        <p className="text-sm text-muted-foreground">New hires on probation</p>
                       </CardContent>
                     </Card>
                   </div>
@@ -323,15 +316,13 @@ export default function EmployeeReports() {
                               <span className="font-medium">
                                 {dept.department || "Unassigned"}
                               </span>
-                              <span className="text-muted-foreground">
-                                {dept.count} employees
-                              </span>
+                              <span className="text-muted-foreground">{dept.count} employees</span>
                             </div>
                             <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
                               <div
                                 className="bg-primary h-full transition-all"
                                 style={{
-                                  width: `${(dept.count / headcountData.total_employees) * 100}%`,
+                                  width: `${(dept.count / Math.max(1, headcountData.total_employees)) * 100}%`,
                                 }}
                               />
                             </div>
@@ -351,18 +342,12 @@ export default function EmployeeReports() {
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-2 gap-4">
-                        {headcountData.by_employment_type.map((type) => (
-                          <div key={type.employment_type} className="space-y-2">
-                            <p className="text-sm font-medium capitalize">
-                              {type.employment_type}
-                            </p>
-                            <p className="text-3xl font-bold">{type.count}</p>
+                        {Object.entries(headcountData.by_employment_type).map(([employment_type, count]: [string, number]) => (
+                          <div key={employment_type} className="space-y-2">
+                            <p className="text-sm font-medium capitalize">{employment_type}</p>
+                            <p className="text-3xl font-bold">{count}</p>
                             <p className="text-sm text-muted-foreground">
-                              {(
-                                (type.count / headcountData.total_employees) *
-                                100
-                              ).toFixed(1)}
-                              %
+                              {((count / Math.max(1, headcountData.total_employees)) * 100).toFixed(1)}%
                             </p>
                           </div>
                         ))}
@@ -382,7 +367,7 @@ export default function EmployeeReports() {
                       <CardHeader className="pb-3">
                         <CardDescription>Total on Probation</CardDescription>
                         <CardTitle className="text-4xl font-bold">
-                          {probationData.total_on_probation}
+                          {probationData.employees_on_probation ?? probationData.employees.length}
                         </CardTitle>
                       </CardHeader>
                     </Card>
@@ -391,7 +376,7 @@ export default function EmployeeReports() {
                       <CardHeader className="pb-3">
                         <CardDescription>Ending Soon (30 days)</CardDescription>
                         <CardTitle className="text-4xl font-bold text-amber-600">
-                          {probationData.ending_soon}
+                          {probationData.employees.filter((e) => e.days_remaining <= 30).length}
                         </CardTitle>
                       </CardHeader>
                     </Card>
@@ -400,7 +385,7 @@ export default function EmployeeReports() {
                       <CardHeader className="pb-3">
                         <CardDescription>Ending This Week</CardDescription>
                         <CardTitle className="text-4xl font-bold text-rose-600">
-                          {probationData.ending_this_week}
+                          {probationData.employees.filter((e) => e.days_remaining <= 7).length}
                         </CardTitle>
                       </CardHeader>
                     </Card>
@@ -417,12 +402,12 @@ export default function EmployeeReports() {
                       <div className="space-y-3">
                         {probationData.employees.map((employee) => (
                           <div
-                            key={employee.employee_id}
+                            key={employee.id}
                             className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                           >
                             <div className="space-y-1">
                               <p className="font-medium">
-                                {employee.employee_name}
+                                {employee.full_name}
                               </p>
                               <p className="text-sm text-muted-foreground">
                                 {employee.department || "Unassigned"}
@@ -469,7 +454,7 @@ export default function EmployeeReports() {
                       <CardHeader className="pb-3">
                         <CardDescription>Total Contracts</CardDescription>
                         <CardTitle className="text-4xl font-bold">
-                          {contractsData.total_contracts}
+                          {contractsData.contracts_expiring ?? contractsData.employees.length}
                         </CardTitle>
                       </CardHeader>
                     </Card>
@@ -478,7 +463,7 @@ export default function EmployeeReports() {
                       <CardHeader className="pb-3">
                         <CardDescription>Expiring in 30 Days</CardDescription>
                         <CardTitle className="text-4xl font-bold text-amber-600">
-                          {contractsData.expiring_within_30_days}
+                          {contractsData.employees.filter((e) => e.days_remaining <= 30).length}
                         </CardTitle>
                       </CardHeader>
                     </Card>
@@ -487,7 +472,7 @@ export default function EmployeeReports() {
                       <CardHeader className="pb-3">
                         <CardDescription>Expiring This Week</CardDescription>
                         <CardTitle className="text-4xl font-bold text-rose-600">
-                          {contractsData.expiring_this_week}
+                          {contractsData.employees.filter((e) => e.days_remaining <= 7).length}
                         </CardTitle>
                       </CardHeader>
                     </Card>
@@ -502,14 +487,14 @@ export default function EmployeeReports() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        {contractsData.contracts.map((contract) => (
+                        {contractsData.employees.map((contract: { id: number; full_name: string; department: string; contract_end_date: string; days_remaining: number }) => (
                           <div
-                            key={contract.employee_id}
+                            key={contract.id}
                             className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                           >
                             <div className="space-y-1">
                               <p className="font-medium">
-                                {contract.employee_name}
+                                {contract.full_name}
                               </p>
                               <p className="text-sm text-muted-foreground">
                                 {contract.department || "Unassigned"}
@@ -518,12 +503,12 @@ export default function EmployeeReports() {
                             <div className="text-right space-y-1">
                               <Badge
                                 variant={
-                                  contract.days_until_expiry <= 7
+                                  contract.days_remaining <= 7
                                     ? "destructive"
                                     : "secondary"
                                 }
                               >
-                                {contract.days_until_expiry} days left
+                                {contract.days_remaining} days left
                               </Badge>
                               <p className="text-xs text-muted-foreground">
                                 Expires{" "}
@@ -535,7 +520,7 @@ export default function EmployeeReports() {
                             </div>
                           </div>
                         ))}
-                        {contractsData.contracts.length === 0 && (
+                        {contractsData.employees.length === 0 && (
                           <p className="text-center text-muted-foreground py-8">
                             No contracts expiring soon
                           </p>
@@ -560,27 +545,16 @@ export default function EmployeeReports() {
                   <div className="space-y-3">
                     {anniversariesData.map((anniversary) => (
                       <div
-                        key={anniversary.employee_id}
+                        key={anniversary.id}
                         className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                       >
                         <div className="space-y-1">
-                          <p className="font-medium">
-                            {anniversary.employee_name}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {anniversary.department || "Unassigned"}
-                          </p>
+                          <p className="font-medium">{anniversary.full_name}</p>
+                          <p className="text-sm text-muted-foreground">{anniversary.department || "Unassigned"}</p>
                         </div>
                         <div className="text-right space-y-1">
-                          <Badge className="bg-purple-500/10 text-purple-700 border-purple-200">
-                            {anniversary.years_completed} years
-                          </Badge>
-                          <p className="text-xs text-muted-foreground">
-                            {format(
-                              parseISO(anniversary.anniversary_date),
-                              "MMM d, yyyy",
-                            )}
-                          </p>
+                          <Badge className="bg-purple-500/10 text-purple-700 border-purple-200">{anniversary.years} years</Badge>
+                          <p className="text-xs text-muted-foreground">{format(parseISO(anniversary.anniversary_date), "MMM d, yyyy")}</p>
                         </div>
                       </div>
                     ))}
@@ -605,29 +579,26 @@ export default function EmployeeReports() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {birthdaysData.map((birthday) => (
-                      <div
-                        key={birthday.employee_id}
-                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                      >
-                        <div className="space-y-1">
-                          <p className="font-medium">
-                            {birthday.employee_name}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {birthday.department || "Unassigned"}
-                          </p>
+                    {birthdaysData.map((birthday) => {
+                      const target = parseISO(birthday.birthday_date);
+                      const now = new Date();
+                      let next = new Date(target);
+                      next.setFullYear(now.getFullYear());
+                      if (next.getTime() < now.getTime()) next.setFullYear(now.getFullYear() + 1);
+                      const daysUntil = Math.ceil((next.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                      return (
+                        <div key={birthday.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                          <div className="space-y-1">
+                            <p className="font-medium">{birthday.full_name}</p>
+                            <p className="text-sm text-muted-foreground">{birthday.department || "Unassigned"}</p>
+                          </div>
+                          <div className="text-right space-y-1">
+                            <Badge className="bg-pink-500/10 text-pink-700 border-pink-200">{daysUntil} days</Badge>
+                            <p className="text-xs text-muted-foreground">{format(parseISO(birthday.birthday_date), "MMM d")}</p>
+                          </div>
                         </div>
-                        <div className="text-right space-y-1">
-                          <Badge className="bg-pink-500/10 text-pink-700 border-pink-200">
-                            {birthday.days_until} days
-                          </Badge>
-                          <p className="text-xs text-muted-foreground">
-                            {format(parseISO(birthday.birthday), "MMM d")}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                     {birthdaysData.length === 0 && (
                       <p className="text-center text-muted-foreground py-8">
                         No upcoming birthdays in the next 30 days
@@ -651,33 +622,21 @@ export default function EmployeeReports() {
                             Total Monthly Payroll
                           </CardDescription>
                           <CardTitle className="text-4xl font-bold text-emerald-600">
-                            {formatSalary(
-                              salaryData.total_payroll,
-                              salaryData.currency,
-                            )}
+                            {formatSalary(salaryData.total_payroll)}
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-sm text-muted-foreground">
-                            Across {salaryData.total_employees} employees
-                          </p>
+                          <p className="text-sm text-muted-foreground">Across {salaryData.total_employees} employees</p>
                         </CardContent>
                       </Card>
 
                       <Card>
                         <CardHeader className="pb-3">
                           <CardDescription>Average Salary</CardDescription>
-                          <CardTitle className="text-4xl font-bold">
-                            {formatSalary(
-                              salaryData.average_salary,
-                              salaryData.currency,
-                            )}
-                          </CardTitle>
+                          <CardTitle className="text-4xl font-bold">{formatSalary(salaryData.average_salary)}</CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-sm text-muted-foreground">
-                            Per employee
-                          </p>
+                          <p className="text-sm text-muted-foreground">Per employee</p>
                         </CardContent>
                       </Card>
                     </div>
@@ -685,40 +644,20 @@ export default function EmployeeReports() {
                     <Card>
                       <CardHeader>
                         <CardTitle>Salary by Department</CardTitle>
-                        <CardDescription>
-                          Departmental payroll breakdown
-                        </CardDescription>
+                        <CardDescription>Departmental payroll breakdown</CardDescription>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-4">
-                          {salaryData.by_department.map((dept) => (
+                          {((salaryData as any).by_department || []).map((dept: any) => (
                             <div key={dept.department} className="space-y-2">
                               <div className="flex items-center justify-between text-sm">
-                                <span className="font-medium">
-                                  {dept.department || "Unassigned"}
-                                </span>
-                                <span className="font-semibold">
-                                  {formatSalary(
-                                    dept.total_salary,
-                                    salaryData.currency,
-                                  )}
-                                </span>
+                                <span className="font-medium">{dept.department || "Unassigned"}</span>
+                                <span className="font-semibold">{formatSalary(dept.total_salary)}</span>
                               </div>
                               <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-                                <div
-                                  className="bg-emerald-500 h-full transition-all"
-                                  style={{
-                                    width: `${(dept.total_salary / salaryData.total_payroll) * 100}%`,
-                                  }}
-                                />
+                                <div className="bg-emerald-500 h-full transition-all" style={{width: `${(dept.total_salary / Math.max(1, salaryData.total_payroll)) * 100}%`}} />
                               </div>
-                              <p className="text-xs text-muted-foreground">
-                                {dept.employee_count} employees • Avg:{" "}
-                                {formatSalary(
-                                  dept.average_salary,
-                                  salaryData.currency,
-                                )}
-                              </p>
+                              <p className="text-xs text-muted-foreground">{dept.employee_count} employees • Avg: {formatSalary(dept.average_salary)}</p>
                             </div>
                           ))}
                         </div>

@@ -116,13 +116,18 @@ export interface EmploymentHistoryEntry {
 }
 
 export interface SalarySummary {
-  department: string;
+  // Total payroll amount across all employees (e.g., monthly payroll)
+  total_payroll: number;
+  // Currency code used (optional)
+  currency?: string;
   total_employees: number;
-  total_salary_expense: number;
   average_salary: number;
-  salary_ranges: Array<{
-    range: string;
-    count: number;
+  // Breakdown by department if the API provides it
+  by_department: Array<{
+    department: string;
+    total_salary: number;
+    average_salary: number;
+    employee_count: number;
   }>;
 }
 
@@ -492,11 +497,11 @@ export function getUniqueDepartments(employees: Employee[]): string[] {
 /**
  * Format salary for display
  */
-export function formatSalary(salary: number | undefined): string {
+export function formatSalary(salary: number | undefined, currency: string = "USD"): string {
   if (salary === undefined) return "N/A";
   return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "USD",
+    currency,
   }).format(salary);
 }
 

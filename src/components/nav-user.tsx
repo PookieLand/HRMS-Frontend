@@ -3,12 +3,8 @@ import { useAsgardeo } from "@asgardeo/react";
 import { Link } from "@tanstack/react-router";
 import {
   BadgeCheck,
-  Bell,
   ChevronsUpDown,
-  CreditCard,
   LogOut,
-  Sparkles,
-  Key,
 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
