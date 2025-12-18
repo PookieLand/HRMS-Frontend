@@ -15,10 +15,14 @@ COPY . .
 # Accept build arguments for Asgardeo configuration
 ARG VITE_CLIENT_ID=""
 ARG VITE_ORG_BASE_URL=""
+ARG VITE_APP_NAME=""
+ARG VITE_API_BASE_URL=""
 
 # Set environment variables for build
 ENV VITE_CLIENT_ID=${VITE_CLIENT_ID}
 ENV VITE_ORG_BASE_URL=${VITE_ORG_BASE_URL}
+ENV VITE_APP_NAME=${VITE_APP_NAME}
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
 
 # Build the application
 RUN npm run build
