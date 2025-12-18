@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-push:
-    uses: PookieLand/workflows_hrms/.github/workflows/reusable-build-push.yml@v1.1.1
+    uses: PookieLand/workflows_hrms/.github/workflows/reusable-build-push.yml@v1.1.2
     with:
       servicePath: '.'
       imageName: 'hrms/frontend'
@@ -18,7 +18,7 @@ jobs:
       vite_client_id: VcwmDYW0_PKGIRtHwCcmEIDfeWUa
       vite_org_base_url: https://api.asgardeo.io/t/pookieland
       vite_app_name: HRMS System
-      vite_api_base_url: '/'
+      vite_api_base_url: ''
       
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
