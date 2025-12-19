@@ -9,7 +9,6 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { AsgardeoProvider } from "@asgardeo/react";
-import { CLIENT_ID, ORG_BASE_URL } from "./lib/config";
 
 import "./styles.css";
 import reportWebVitals from "./reportWebVitals.ts";
