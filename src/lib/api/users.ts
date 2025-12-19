@@ -1,7 +1,6 @@
 // User Management API Client
 // Handles all API calls for user management including onboarding, profile, and user operations
 
-<<<<<<< Updated upstream
 import { apiBase } from "./apiBase";
 
 const USER_SERVICE_URL = apiBase(
@@ -273,7 +272,6 @@ export async function initiateOnboarding(
   data: InitiateOnboardingRequest,
 ): Promise<InitiateOnboardingResponse> {
   return fetchWithAuth<InitiateOnboardingResponse>(
-<<<<<<< Updated upstream
     `${USER_SERVICE_URL}/onboarding/initiate`,
     accessToken,
     {
@@ -290,7 +288,6 @@ export async function getOnboardingPreview(
   invitationToken: string,
 ): Promise<OnboardingPreview> {
   return fetchPublic<OnboardingPreview>(
-<<<<<<< Updated upstream
     `${USER_SERVICE_URL}/onboarding/preview/${invitationToken}`,
   );
 }
@@ -302,7 +299,6 @@ export async function signupStep1(
   data: SignupStep1Request,
 ): Promise<SignupStep1Response> {
   return fetchPublic<SignupStep1Response>(
-<<<<<<< Updated upstream
     `${USER_SERVICE_URL}/onboarding/signup/step1`,
     {
       method: "POST",
@@ -318,7 +314,6 @@ export async function signupStep2(
   data: SignupStep2Request,
 ): Promise<SignupStep2Response> {
   return fetchPublic<SignupStep2Response>(
-<<<<<<< Updated upstream
     `${USER_SERVICE_URL}/onboarding/signup/step2`,
     {
       method: "POST",
@@ -335,7 +330,6 @@ export async function getOnboardingStatus(
   invitationToken: string,
 ): Promise<OnboardingStatusResponse> {
   return fetchWithAuth<OnboardingStatusResponse>(
-<<<<<<< Updated upstream
     `${USER_SERVICE_URL}/onboarding/status/${invitationToken}`,
     accessToken,
   );
@@ -358,7 +352,7 @@ export async function listOnboardingInvitations(
   if (params?.offset) searchParams.append("offset", params.offset.toString());
 
   const queryString = searchParams.toString();
-<<<<<<< Updated upstream
+
   const url = `${USER_SERVICE_URL}/onboarding/list${queryString ? `?${queryString}` : ""}`;
 
   return fetchWithAuth<OnboardingListResponse>(url, accessToken);
@@ -373,7 +367,6 @@ export async function cancelOnboarding(
   reason?: string,
 ): Promise<MessageResponse> {
   return fetchWithAuth<MessageResponse>(
-<<<<<<< Updated upstream
     `${USER_SERVICE_URL}/onboarding/cancel/${invitationToken}`,
     accessToken,
     {
@@ -391,7 +384,6 @@ export async function resendInvitation(
   invitationToken: string,
 ): Promise<MessageResponse> {
   return fetchWithAuth<MessageResponse>(
-<<<<<<< Updated upstream
     `${USER_SERVICE_URL}/onboarding/resend/${invitationToken}`,
     accessToken,
     {
@@ -423,7 +415,7 @@ export async function listUsers(
   if (params?.offset) searchParams.append("offset", params.offset.toString());
 
   const queryString = searchParams.toString();
-<<<<<<< Updated upstream
+
   const url = `${USER_SERVICE_URL}/users${queryString ? `?${queryString}` : ""}`;
 
   return fetchWithAuth<UserListResponse>(url, accessToken);
@@ -437,7 +429,6 @@ export async function getUser(
   userId: number,
 ): Promise<UserProfile> {
   return fetchWithAuth<UserProfile>(
-<<<<<<< Updated upstream
     `${USER_SERVICE_URL}/users/${userId}`,
     accessToken,
   );
@@ -449,7 +440,6 @@ export async function getUser(
 export async function getCurrentUser(
   accessToken: string,
 ): Promise<UserProfile> {
-<<<<<<< Updated upstream
   return fetchWithAuth<UserProfile>(
     `${USER_SERVICE_URL}/users/me`,
     accessToken,
@@ -465,7 +455,6 @@ export async function updateUserRole(
   data: UpdateUserRoleRequest,
 ): Promise<MessageResponse> {
   return fetchWithAuth<MessageResponse>(
-<<<<<<< Updated upstream
     `${USER_SERVICE_URL}/users/${userId}/role`,
     accessToken,
     {
@@ -484,7 +473,6 @@ export async function suspendUser(
   data: SuspendUserRequest,
 ): Promise<MessageResponse> {
   return fetchWithAuth<MessageResponse>(
-<<<<<<< Updated upstream
     `${USER_SERVICE_URL}/users/${userId}/suspend`,
     accessToken,
     {
@@ -502,7 +490,6 @@ export async function activateUser(
   userId: number,
 ): Promise<MessageResponse> {
   return fetchWithAuth<MessageResponse>(
-<<<<<<< Updated upstream
     `${USER_SERVICE_URL}/users/${userId}/activate`,
     accessToken,
     {
@@ -520,7 +507,6 @@ export async function deleteUser(
   data?: DeleteUserRequest,
 ): Promise<MessageResponse> {
   return fetchWithAuth<MessageResponse>(
-<<<<<<< Updated upstream
     `${USER_SERVICE_URL}/users/${userId}`,
     accessToken,
     {
@@ -534,7 +520,6 @@ export async function deleteUser(
  * List available roles
  */
 export async function listRoles(accessToken: string): Promise<RoleInfo[]> {
-<<<<<<< Updated upstream
   return fetchWithAuth<RoleInfo[]>(
     `${USER_SERVICE_URL}/users/roles`,
     accessToken,
@@ -548,7 +533,6 @@ export async function getUserPermissions(
   accessToken: string,
 ): Promise<UserPermissions> {
   return fetchWithAuth<UserPermissions>(
-<<<<<<< Updated upstream
     `${USER_SERVICE_URL}/users/permissions`,
     accessToken,
   );
@@ -561,7 +545,6 @@ export async function syncUsersFromAsgardeo(
   accessToken: string,
 ): Promise<MessageResponse> {
   return fetchWithAuth<MessageResponse>(
-<<<<<<< Updated upstream
     `${USER_SERVICE_URL}/users/sync`,
     accessToken,
     {

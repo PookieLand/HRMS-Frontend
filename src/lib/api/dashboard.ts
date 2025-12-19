@@ -1,11 +1,13 @@
 // Dashboard API Client
 // Handles all API calls for the HR Dashboard
 
-<<<<<<< Updated upstream
 // Service URLs - configured via environment variables (use apiBase helper)
 import { apiBase } from "./apiBase";
 
-const USER_SERVICE_URL = apiBase("VITE_USER_SERVICE_URL", "http://localhost:8000");
+const USER_SERVICE_URL = apiBase(
+  "VITE_USER_SERVICE_URL",
+  "http://localhost:8000",
+);
 const EMPLOYEE_SERVICE_URL = apiBase(
   "VITE_EMPLOYEE_SERVICE_URL",
   "http://localhost:8001",
@@ -14,8 +16,14 @@ const ATTENDANCE_SERVICE_URL = apiBase(
   "VITE_ATTENDANCE_SERVICE_URL",
   "http://localhost:8002",
 );
-const LEAVE_SERVICE_URL = apiBase("VITE_LEAVE_SERVICE_URL", "http://localhost:8003");
-const AUDIT_SERVICE_URL = apiBase("VITE_AUDIT_SERVICE_URL", "http://localhost:8004");
+const LEAVE_SERVICE_URL = apiBase(
+  "VITE_LEAVE_SERVICE_URL",
+  "http://localhost:8003",
+);
+const AUDIT_SERVICE_URL = apiBase(
+  "VITE_AUDIT_SERVICE_URL",
+  "http://localhost:8004",
+);
 
 // Types
 export interface Employee {
@@ -132,7 +140,6 @@ export async function getEmployees(
   limit: number = 100,
 ): Promise<Employee[]> {
   const response = await fetchWithAuth<EmployeeListResponse>(
-<<<<<<< Updated upstream
     `${EMPLOYEE_SERVICE_URL}/employees?offset=${offset}&limit=${limit}`,
     accessToken,
   );
@@ -151,7 +158,6 @@ export async function getAttendanceDashboard(
   date?: string,
 ): Promise<AttendanceDashboard> {
   const url = date
-<<<<<<< Updated upstream
     ? `${ATTENDANCE_SERVICE_URL}/attendance/dashboard?date=${date}`
     : `${ATTENDANCE_SERVICE_URL}/attendance/dashboard`;
   return fetchWithAuth<AttendanceDashboard>(url, accessToken);
@@ -162,7 +168,6 @@ export async function getMyAttendanceToday(
 ): Promise<AttendanceRecord | null> {
   try {
     return await fetchWithAuth<AttendanceRecord>(
-<<<<<<< Updated upstream
       `${ATTENDANCE_SERVICE_URL}/attendance/me/today`,
       accessToken,
     );
@@ -176,7 +181,6 @@ export async function getLeaveSummary(
   accessToken: string,
 ): Promise<LeaveSummary> {
   return fetchWithAuth<LeaveSummary>(
-<<<<<<< Updated upstream
     `${LEAVE_SERVICE_URL}/leave/dashboard/summary`,
     accessToken,
   );
@@ -186,7 +190,6 @@ export async function getPendingLeaves(
   accessToken: string,
 ): Promise<LeaveRequest[]> {
   return fetchWithAuth<LeaveRequest[]>(
-<<<<<<< Updated upstream
     `${LEAVE_SERVICE_URL}/leave/pending`,
     accessToken,
   );
@@ -196,7 +199,6 @@ export async function getMyLeaves(
   accessToken: string,
 ): Promise<LeaveRequest[]> {
   return fetchWithAuth<LeaveRequest[]>(
-<<<<<<< Updated upstream
     `${LEAVE_SERVICE_URL}/leave/me`,
     accessToken,
   );
@@ -208,7 +210,6 @@ export async function getRecentAuditLogs(
   limit: number = 10,
 ): Promise<AuditLog[]> {
   return fetchWithAuth<AuditLog[]>(
-<<<<<<< Updated upstream
     `${AUDIT_SERVICE_URL}/audit-logs?limit=${limit}`,
     accessToken,
   );
