@@ -1,7 +1,7 @@
 import { useAsgardeo } from "@asgardeo/react";
+import apiBase from "./apiBase";
 
-const LEAVE_SERVICE_URL =
-  import.meta.env.VITE_LEAVE_SERVICE_URL || "http://localhost:8003/api/v1";
+const LEAVE_SERVICE_URL = apiBase("VITE_LEAVE_SERVICE_URL", "http://localhost:8003");
 
 export interface LeaveRequest {
   employee_id: string;

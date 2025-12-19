@@ -1,5 +1,7 @@
-// API Base URL - you can configure this via environment variable
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+// API Base URL - use centralized helper to ensure `/api/v1` is appended
+import { apiBase } from "./apiBase";
+
+const API_BASE_URL = apiBase("VITE_API_BASE_URL", "http://localhost:8000");
 
 export interface SignupRequest {
   email: string;
@@ -28,7 +30,7 @@ export interface ErrorResponse {
  */
 export async function signup(data: SignupRequest): Promise<SignupResponse> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/v1/auth/signup`, {
+    const response = await fetch(`${API_BASE_URL}/auth/signup`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
