@@ -2,8 +2,12 @@
 // Handles all READ operations directly to employee-management-service
 // Per architecture: reads go directly to employee-service, writes go through user-service
 
-const EMPLOYEE_SERVICE_URL =
-  import.meta.env.VITE_EMPLOYEE_SERVICE_URL || "http://localhost:8001";
+import { apiBase } from "./apiBase";
+
+const EMPLOYEE_SERVICE_URL = apiBase(
+  "VITE_EMPLOYEE_SERVICE_URL",
+  "http://localhost:8001",
+);
 
 // ============================================================================
 // Types & Interfaces
@@ -262,7 +266,7 @@ export async function getEmployee(
   accessToken: string,
 ): Promise<Employee> {
   return fetchWithAuth<Employee>(
-    `${EMPLOYEE_SERVICE_URL}/api/v1/employees/${employeeId}`,
+    `${EMPLOYEE_SERVICE_URL}/employees/${employeeId}`,
     accessToken,
   );
 }
@@ -272,7 +276,7 @@ export async function getEmployee(
  */
 export async function getMyProfile(accessToken: string): Promise<Employee> {
   return fetchWithAuth<Employee>(
-    `${EMPLOYEE_SERVICE_URL}/api/v1/employees/me`,
+    `${EMPLOYEE_SERVICE_URL}/employees/me`,
     accessToken,
   );
 }
@@ -294,7 +298,7 @@ export async function listEmployees(
   if (params.employment_type) queryParams.append("employment_type", params.employment_type);
   if (params.search) queryParams.append("search", params.search);
 
-  const url = `${EMPLOYEE_SERVICE_URL}/api/v1/employees?${queryParams.toString()}`;
+  const url = `${EMPLOYEE_SERVICE_URL}/employees?${queryParams.toString()}`;
   return fetchWithAuth<EmployeeListResponse>(url, accessToken);
 }
 
@@ -306,8 +310,8 @@ export async function getEmployeeSummary(
   department?: string,
 ): Promise<EmployeeSummary[]> {
   const url = department
-    ? `${EMPLOYEE_SERVICE_URL}/api/v1/employees/summary?department=${department}`
-    : `${EMPLOYEE_SERVICE_URL}/api/v1/employees/summary`;
+    ? `${EMPLOYEE_SERVICE_URL}/employees/summary?department=${department}`
+    : `${EMPLOYEE_SERVICE_URL}/employees/summary`;
 
   return fetchWithAuth<EmployeeSummary[]>(url, accessToken);
 }
@@ -320,7 +324,7 @@ export async function searchEmployees(
   query: string,
 ): Promise<Employee[]> {
   return fetchWithAuth<Employee[]>(
-    `${EMPLOYEE_SERVICE_URL}/api/v1/employees/search?q=${encodeURIComponent(query)}`,
+    `${EMPLOYEE_SERVICE_URL}/employees/search?q=${encodeURIComponent(query)}`,
     accessToken,
   );
 }
@@ -333,7 +337,7 @@ export async function getEmploymentHistory(
   accessToken: string,
 ): Promise<EmploymentHistoryEntry[]> {
   return fetchWithAuth<EmploymentHistoryEntry[]>(
-    `${EMPLOYEE_SERVICE_URL}/api/v1/employees/${employeeId}/history`,
+    `${EMPLOYEE_SERVICE_URL}/employees/${employeeId}/history`,
     accessToken,
   );
 }
@@ -350,7 +354,7 @@ export async function getTeamMembers(
   accessToken: string,
 ): Promise<Team> {
   return fetchWithAuth<Team>(
-    `${EMPLOYEE_SERVICE_URL}/api/v1/teams/${managerId}/members`,
+    `${EMPLOYEE_SERVICE_URL}/teams/${managerId}/members`,
     accessToken,
   );
 }
@@ -363,7 +367,7 @@ export async function getOrganizationHierarchy(
   accessToken: string,
 ): Promise<HierarchyNode> {
   return fetchWithAuth<HierarchyNode>(
-    `${EMPLOYEE_SERVICE_URL}/api/v1/hierarchy`,
+    `${EMPLOYEE_SERVICE_URL}/hierarchy`,
     accessToken,
   );
 }
@@ -376,7 +380,7 @@ export async function getReportingChain(
   accessToken: string,
 ): Promise<ReportingChain> {
   return fetchWithAuth<ReportingChain>(
-    `${EMPLOYEE_SERVICE_URL}/api/v1/hierarchy/${employeeId}`,
+    `${EMPLOYEE_SERVICE_URL}/hierarchy/${employeeId}`,
     accessToken,
   );
 }
@@ -394,8 +398,8 @@ export async function getSalarySummary(
   department?: string,
 ): Promise<SalarySummary> {
   const url = department
-    ? `${EMPLOYEE_SERVICE_URL}/api/v1/reports/salary-summary?department=${department}`
-    : `${EMPLOYEE_SERVICE_URL}/api/v1/reports/salary-summary`;
+    ? `${EMPLOYEE_SERVICE_URL}/reports/salary-summary?department=${department}`
+    : `${EMPLOYEE_SERVICE_URL}/reports/salary-summary`;
 
   return fetchWithAuth<SalarySummary>(url, accessToken);
 }
@@ -407,7 +411,7 @@ export async function getHeadcountReport(
   accessToken: string,
 ): Promise<HeadcountReport> {
   return fetchWithAuth<HeadcountReport>(
-    `${EMPLOYEE_SERVICE_URL}/api/v1/reports/headcount`,
+    `${EMPLOYEE_SERVICE_URL}/reports/headcount`,
     accessToken,
   );
 }
@@ -419,7 +423,7 @@ export async function getProbationStatus(
   accessToken: string,
 ): Promise<ProbationStatusReport> {
   return fetchWithAuth<ProbationStatusReport>(
-    `${EMPLOYEE_SERVICE_URL}/api/v1/reports/probation-status`,
+    `${EMPLOYEE_SERVICE_URL}/reports/probation-status`,
     accessToken,
   );
 }
@@ -432,8 +436,8 @@ export async function getContractsExpiring(
   days?: number,
 ): Promise<ContractsExpiringReport> {
   const url = days
-    ? `${EMPLOYEE_SERVICE_URL}/api/v1/reports/contracts-expiring?days=${days}`
-    : `${EMPLOYEE_SERVICE_URL}/api/v1/reports/contracts-expiring`;
+    ? `${EMPLOYEE_SERVICE_URL}/reports/contracts-expiring?days=${days}`
+    : `${EMPLOYEE_SERVICE_URL}/reports/contracts-expiring`;
 
   return fetchWithAuth<ContractsExpiringReport>(url, accessToken);
 }
@@ -446,8 +450,8 @@ export async function getUpcomingAnniversaries(
   days?: number,
 ): Promise<Anniversary[]> {
   const url = days
-    ? `${EMPLOYEE_SERVICE_URL}/api/v1/reports/anniversaries?days=${days}`
-    : `${EMPLOYEE_SERVICE_URL}/api/v1/reports/anniversaries`;
+    ? `${EMPLOYEE_SERVICE_URL}/reports/anniversaries?days=${days}`
+    : `${EMPLOYEE_SERVICE_URL}/reports/anniversaries`;
 
   return fetchWithAuth<Anniversary[]>(url, accessToken);
 }
@@ -460,8 +464,8 @@ export async function getUpcomingBirthdays(
   days?: number,
 ): Promise<Birthday[]> {
   const url = days
-    ? `${EMPLOYEE_SERVICE_URL}/api/v1/reports/birthdays?days=${days}`
-    : `${EMPLOYEE_SERVICE_URL}/api/v1/reports/birthdays`;
+    ? `${EMPLOYEE_SERVICE_URL}/reports/birthdays?days=${days}`
+    : `${EMPLOYEE_SERVICE_URL}/reports/birthdays`;
 
   return fetchWithAuth<Birthday[]>(url, accessToken);
 }
@@ -477,7 +481,7 @@ export async function getDashboardMetrics(
   accessToken: string,
 ): Promise<DashboardMetrics> {
   return fetchWithAuth<DashboardMetrics>(
-    `${EMPLOYEE_SERVICE_URL}/api/v1/dashboard/metrics`,
+    `${EMPLOYEE_SERVICE_URL}/dashboard/metrics`,
     accessToken,
   );
 }

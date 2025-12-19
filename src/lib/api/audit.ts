@@ -1,8 +1,8 @@
 // Audit Service API Client
 import { useAsgardeo } from "@asgardeo/react";
+import apiBase from "./apiBase";
 
-const AUDIT_SERVICE_URL =
-  import.meta.env.VITE_AUDIT_SERVICE_URL || "http://localhost:8004/api/v1";
+const AUDIT_SERVICE_URL = apiBase("VITE_AUDIT_SERVICE_URL", "http://localhost:8004");
 
 // ============================================================================
 // Types & Interfaces

@@ -1,8 +1,12 @@
 // User Management API Client
 // Handles all API calls for user management including onboarding, profile, and user operations
 
-const USER_SERVICE_URL =
-  import.meta.env.VITE_USER_SERVICE_URL || "http://localhost:8000";
+import { apiBase } from "./apiBase";
+
+const USER_SERVICE_URL = apiBase(
+  "VITE_USER_SERVICE_URL",
+  "http://localhost:8000",
+);
 
 // ============================================================================
 // Types
@@ -268,7 +272,7 @@ export async function initiateOnboarding(
   data: InitiateOnboardingRequest,
 ): Promise<InitiateOnboardingResponse> {
   return fetchWithAuth<InitiateOnboardingResponse>(
-    `${USER_SERVICE_URL}/api/v1/onboarding/initiate`,
+    `${USER_SERVICE_URL}/onboarding/initiate`,
     accessToken,
     {
       method: "POST",
@@ -284,7 +288,7 @@ export async function getOnboardingPreview(
   invitationToken: string,
 ): Promise<OnboardingPreview> {
   return fetchPublic<OnboardingPreview>(
-    `${USER_SERVICE_URL}/api/v1/onboarding/preview/${invitationToken}`,
+    `${USER_SERVICE_URL}/onboarding/preview/${invitationToken}`,
   );
 }
 
@@ -295,7 +299,7 @@ export async function signupStep1(
   data: SignupStep1Request,
 ): Promise<SignupStep1Response> {
   return fetchPublic<SignupStep1Response>(
-    `${USER_SERVICE_URL}/api/v1/onboarding/signup/step1`,
+    `${USER_SERVICE_URL}/onboarding/signup/step1`,
     {
       method: "POST",
       body: JSON.stringify(data),
@@ -310,7 +314,7 @@ export async function signupStep2(
   data: SignupStep2Request,
 ): Promise<SignupStep2Response> {
   return fetchPublic<SignupStep2Response>(
-    `${USER_SERVICE_URL}/api/v1/onboarding/signup/step2`,
+    `${USER_SERVICE_URL}/onboarding/signup/step2`,
     {
       method: "POST",
       body: JSON.stringify(data),
@@ -326,7 +330,7 @@ export async function getOnboardingStatus(
   invitationToken: string,
 ): Promise<OnboardingStatusResponse> {
   return fetchWithAuth<OnboardingStatusResponse>(
-    `${USER_SERVICE_URL}/api/v1/onboarding/status/${invitationToken}`,
+    `${USER_SERVICE_URL}/onboarding/status/${invitationToken}`,
     accessToken,
   );
 }
@@ -348,7 +352,7 @@ export async function listOnboardingInvitations(
   if (params?.offset) searchParams.append("offset", params.offset.toString());
 
   const queryString = searchParams.toString();
-  const url = `${USER_SERVICE_URL}/api/v1/onboarding/list${queryString ? `?${queryString}` : ""}`;
+  const url = `${USER_SERVICE_URL}/onboarding/list${queryString ? `?${queryString}` : ""}`;
 
   return fetchWithAuth<OnboardingListResponse>(url, accessToken);
 }
@@ -362,7 +366,7 @@ export async function cancelOnboarding(
   reason?: string,
 ): Promise<MessageResponse> {
   return fetchWithAuth<MessageResponse>(
-    `${USER_SERVICE_URL}/api/v1/onboarding/cancel/${invitationToken}`,
+    `${USER_SERVICE_URL}/onboarding/cancel/${invitationToken}`,
     accessToken,
     {
       method: "POST",
@@ -379,7 +383,7 @@ export async function resendInvitation(
   invitationToken: string,
 ): Promise<MessageResponse> {
   return fetchWithAuth<MessageResponse>(
-    `${USER_SERVICE_URL}/api/v1/onboarding/resend/${invitationToken}`,
+    `${USER_SERVICE_URL}/onboarding/resend/${invitationToken}`,
     accessToken,
     {
       method: "POST",
@@ -410,7 +414,7 @@ export async function listUsers(
   if (params?.offset) searchParams.append("offset", params.offset.toString());
 
   const queryString = searchParams.toString();
-  const url = `${USER_SERVICE_URL}/api/v1/users${queryString ? `?${queryString}` : ""}`;
+  const url = `${USER_SERVICE_URL}/users${queryString ? `?${queryString}` : ""}`;
 
   return fetchWithAuth<UserListResponse>(url, accessToken);
 }
@@ -423,7 +427,7 @@ export async function getUser(
   userId: number,
 ): Promise<UserProfile> {
   return fetchWithAuth<UserProfile>(
-    `${USER_SERVICE_URL}/api/v1/users/${userId}`,
+    `${USER_SERVICE_URL}/users/${userId}`,
     accessToken,
   );
 }
@@ -435,7 +439,7 @@ export async function getCurrentUser(
   accessToken: string,
 ): Promise<UserProfile> {
   return fetchWithAuth<UserProfile>(
-    `${USER_SERVICE_URL}/api/v1/users/me`,
+    `${USER_SERVICE_URL}/users/me`,
     accessToken,
   );
 }
@@ -449,7 +453,7 @@ export async function updateUserRole(
   data: UpdateUserRoleRequest,
 ): Promise<MessageResponse> {
   return fetchWithAuth<MessageResponse>(
-    `${USER_SERVICE_URL}/api/v1/users/${userId}/role`,
+    `${USER_SERVICE_URL}/users/${userId}/role`,
     accessToken,
     {
       method: "PUT",
@@ -467,7 +471,7 @@ export async function suspendUser(
   data: SuspendUserRequest,
 ): Promise<MessageResponse> {
   return fetchWithAuth<MessageResponse>(
-    `${USER_SERVICE_URL}/api/v1/users/${userId}/suspend`,
+    `${USER_SERVICE_URL}/users/${userId}/suspend`,
     accessToken,
     {
       method: "POST",
@@ -484,7 +488,7 @@ export async function activateUser(
   userId: number,
 ): Promise<MessageResponse> {
   return fetchWithAuth<MessageResponse>(
-    `${USER_SERVICE_URL}/api/v1/users/${userId}/activate`,
+    `${USER_SERVICE_URL}/users/${userId}/activate`,
     accessToken,
     {
       method: "POST",
@@ -501,7 +505,7 @@ export async function deleteUser(
   data?: DeleteUserRequest,
 ): Promise<MessageResponse> {
   return fetchWithAuth<MessageResponse>(
-    `${USER_SERVICE_URL}/api/v1/users/${userId}`,
+    `${USER_SERVICE_URL}/users/${userId}`,
     accessToken,
     {
       method: "DELETE",
@@ -515,7 +519,7 @@ export async function deleteUser(
  */
 export async function listRoles(accessToken: string): Promise<RoleInfo[]> {
   return fetchWithAuth<RoleInfo[]>(
-    `${USER_SERVICE_URL}/api/v1/users/roles`,
+    `${USER_SERVICE_URL}/users/roles`,
     accessToken,
   );
 }
@@ -527,7 +531,7 @@ export async function getUserPermissions(
   accessToken: string,
 ): Promise<UserPermissions> {
   return fetchWithAuth<UserPermissions>(
-    `${USER_SERVICE_URL}/api/v1/users/permissions`,
+    `${USER_SERVICE_URL}/users/permissions`,
     accessToken,
   );
 }
@@ -539,7 +543,7 @@ export async function syncUsersFromAsgardeo(
   accessToken: string,
 ): Promise<MessageResponse> {
   return fetchWithAuth<MessageResponse>(
-    `${USER_SERVICE_URL}/api/v1/users/sync`,
+    `${USER_SERVICE_URL}/users/sync`,
     accessToken,
     {
       method: "POST",

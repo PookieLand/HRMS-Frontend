@@ -11,8 +11,9 @@
  * 7. Cancel/resend invitations
  */
 
-const API_BASE_URL =
-  import.meta.env.VITE_USER_SERVICE_URL || "http://localhost:8000";
+import { apiBase } from "./apiBase";
+
+const API_BASE_URL = apiBase("VITE_USER_SERVICE_URL", "http://localhost:8000");
 
 // ============================================================================
 // Types
@@ -173,7 +174,7 @@ export async function initiateOnboarding(
   data: InitiateOnboardingRequest,
   accessToken: string,
 ): Promise<InitiateOnboardingResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/v1/onboarding/initiate`, {
+  const response = await fetch(`${API_BASE_URL}/onboarding/initiate`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -202,7 +203,7 @@ export async function getOnboardingPreview(
   invitationToken: string,
 ): Promise<OnboardingPreviewData> {
   const response = await fetch(
-    `${API_BASE_URL}/api/v1/onboarding/preview/${invitationToken}`,
+    `${API_BASE_URL}/onboarding/preview/${invitationToken}`,
     {
       method: "GET",
       headers: {
@@ -231,7 +232,7 @@ export async function completeSignupStep1(
   data: SignupStep1Request,
 ): Promise<SignupStep1Response> {
   const response = await fetch(
-    `${API_BASE_URL}/api/v1/onboarding/signup/step1`,
+    `${API_BASE_URL}/onboarding/signup/step1`,
     {
       method: "POST",
       headers: {
@@ -261,7 +262,7 @@ export async function completeSignupStep2(
   data: SignupStep2Request,
 ): Promise<SignupStep2Response> {
   const response = await fetch(
-    `${API_BASE_URL}/api/v1/onboarding/signup/step2`,
+    `${API_BASE_URL}/onboarding/signup/step2`,
     {
       method: "POST",
       headers: {
@@ -291,7 +292,7 @@ export async function getOnboardingStatus(
   invitationToken: string,
 ): Promise<OnboardingStatusResponse> {
   const response = await fetch(
-    `${API_BASE_URL}/api/v1/onboarding/status/${invitationToken}`,
+    `${API_BASE_URL}/onboarding/status/${invitationToken}`,
     {
       method: "GET",
       headers: {
@@ -331,7 +332,7 @@ export async function listOnboardingInvitations(
   if (params?.limit !== undefined)
     queryParams.append("limit", params.limit.toString());
 
-  const url = `${API_BASE_URL}/api/v1/onboarding/invitations${
+  const url = `${API_BASE_URL}/onboarding/invitations${
     queryParams.toString() ? `?${queryParams.toString()}` : ""
   }`;
 
@@ -365,7 +366,7 @@ export async function cancelOnboarding(
   reason?: string,
 ): Promise<{ message: string }> {
   const response = await fetch(
-    `${API_BASE_URL}/api/v1/onboarding/cancel/${invitationToken}`,
+    `${API_BASE_URL}/onboarding/cancel/${invitationToken}`,
     {
       method: "POST",
       headers: {
@@ -397,7 +398,7 @@ export async function resendInvitation(
   accessToken: string,
 ): Promise<{ message: string; new_expires_at: string }> {
   const response = await fetch(
-    `${API_BASE_URL}/api/v1/onboarding/resend/${invitationToken}`,
+    `${API_BASE_URL}/onboarding/resend/${invitationToken}`,
     {
       method: "POST",
       headers: {

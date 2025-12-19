@@ -1,17 +1,20 @@
 // Dashboard API Client
 // Handles all API calls for the HR Dashboard
 
-// Service URLs - configured via environment variables
-const USER_SERVICE_URL =
-  import.meta.env.VITE_USER_SERVICE_URL || "http://localhost:8000";
-const EMPLOYEE_SERVICE_URL =
-  import.meta.env.VITE_EMPLOYEE_SERVICE_URL || "http://localhost:8001";
-const ATTENDANCE_SERVICE_URL =
-  import.meta.env.VITE_ATTENDANCE_SERVICE_URL || "http://localhost:8002";
-const LEAVE_SERVICE_URL =
-  import.meta.env.VITE_LEAVE_SERVICE_URL || "http://localhost:8003";
-const AUDIT_SERVICE_URL =
-  import.meta.env.VITE_AUDIT_SERVICE_URL || "http://localhost:8004";
+// Service URLs - configured via environment variables (use apiBase helper)
+import { apiBase } from "./apiBase";
+
+const USER_SERVICE_URL = apiBase("VITE_USER_SERVICE_URL", "http://localhost:8000");
+const EMPLOYEE_SERVICE_URL = apiBase(
+  "VITE_EMPLOYEE_SERVICE_URL",
+  "http://localhost:8001",
+);
+const ATTENDANCE_SERVICE_URL = apiBase(
+  "VITE_ATTENDANCE_SERVICE_URL",
+  "http://localhost:8002",
+);
+const LEAVE_SERVICE_URL = apiBase("VITE_LEAVE_SERVICE_URL", "http://localhost:8003");
+const AUDIT_SERVICE_URL = apiBase("VITE_AUDIT_SERVICE_URL", "http://localhost:8004");
 
 // Types
 export interface Employee {
@@ -128,7 +131,7 @@ export async function getEmployees(
   limit: number = 100,
 ): Promise<Employee[]> {
   const response = await fetchWithAuth<EmployeeListResponse>(
-    `${EMPLOYEE_SERVICE_URL}/api/v1/employees?offset=${offset}&limit=${limit}`,
+    `${EMPLOYEE_SERVICE_URL}/employees?offset=${offset}&limit=${limit}`,
     accessToken,
   );
   // API returns { total, employees }, extract the array
@@ -146,8 +149,8 @@ export async function getAttendanceDashboard(
   date?: string,
 ): Promise<AttendanceDashboard> {
   const url = date
-    ? `${ATTENDANCE_SERVICE_URL}/api/v1/attendance/dashboard?date=${date}`
-    : `${ATTENDANCE_SERVICE_URL}/api/v1/attendance/dashboard`;
+    ? `${ATTENDANCE_SERVICE_URL}/attendance/dashboard?date=${date}`
+    : `${ATTENDANCE_SERVICE_URL}/attendance/dashboard`;
   return fetchWithAuth<AttendanceDashboard>(url, accessToken);
 }
 
@@ -156,7 +159,7 @@ export async function getMyAttendanceToday(
 ): Promise<AttendanceRecord | null> {
   try {
     return await fetchWithAuth<AttendanceRecord>(
-      `${ATTENDANCE_SERVICE_URL}/api/v1/attendance/me/today`,
+      `${ATTENDANCE_SERVICE_URL}/attendance/me/today`,
       accessToken,
     );
   } catch {
@@ -169,7 +172,7 @@ export async function getLeaveSummary(
   accessToken: string,
 ): Promise<LeaveSummary> {
   return fetchWithAuth<LeaveSummary>(
-    `${LEAVE_SERVICE_URL}/api/v1/leave/dashboard/summary`,
+    `${LEAVE_SERVICE_URL}/leave/dashboard/summary`,
     accessToken,
   );
 }
@@ -178,7 +181,7 @@ export async function getPendingLeaves(
   accessToken: string,
 ): Promise<LeaveRequest[]> {
   return fetchWithAuth<LeaveRequest[]>(
-    `${LEAVE_SERVICE_URL}/api/v1/leave/pending`,
+    `${LEAVE_SERVICE_URL}/leave/pending`,
     accessToken,
   );
 }
@@ -187,7 +190,7 @@ export async function getMyLeaves(
   accessToken: string,
 ): Promise<LeaveRequest[]> {
   return fetchWithAuth<LeaveRequest[]>(
-    `${LEAVE_SERVICE_URL}/api/v1/leave/me`,
+    `${LEAVE_SERVICE_URL}/leave/me`,
     accessToken,
   );
 }
@@ -198,7 +201,7 @@ export async function getRecentAuditLogs(
   limit: number = 10,
 ): Promise<AuditLog[]> {
   return fetchWithAuth<AuditLog[]>(
-    `${AUDIT_SERVICE_URL}/api/v1/audit-logs?limit=${limit}`,
+    `${AUDIT_SERVICE_URL}/audit-logs?limit=${limit}`,
     accessToken,
   );
 }
