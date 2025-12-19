@@ -12,7 +12,7 @@ export function apiBase(envKey: string, defaultHost: string) {
   // runtime injected config
   let host: string | undefined;
   try {
-    if (typeof window !== "undefined" && (window as any).__ENV && (window as any).__ENV[envKey]) {
+    if (typeof window !== "undefined" && (window as any).__ENV && (envKey in (window as any).__ENV)) {
       host = (window as any).__ENV[envKey];
     }
   } catch (e) {
@@ -20,12 +20,12 @@ export function apiBase(envKey: string, defaultHost: string) {
   }
 
   // fall back to vite build-time env
-  if (!host) {
+  if (host == null) {
     // @ts-ignore - import.meta.env is available in Vite
-    host = (import.meta as any).env?.[envKey] || undefined;
+    host = (import.meta as any).env?.[envKey] ?? undefined;
   }
 
-  const effective = (host || defaultHost) as string;
+  const effective = (host == null ? defaultHost : host) as string;
   const cleaned = stripTrailingSlash(effective);
 
   // If the provided host already contains a versioned API prefix (e.g. "/api/v1"),
