@@ -2,6 +2,7 @@
 // Handles all READ operations directly to employee-management-service
 // Per architecture: reads go directly to employee-service, writes go through user-service
 
+<<<<<<< Updated upstream
 import { apiBase } from "./apiBase";
 
 const EMPLOYEE_SERVICE_URL = apiBase(
@@ -266,6 +267,7 @@ export async function getEmployee(
   accessToken: string,
 ): Promise<Employee> {
   return fetchWithAuth<Employee>(
+<<<<<<< Updated upstream
     `${EMPLOYEE_SERVICE_URL}/employees/${employeeId}`,
     accessToken,
   );
@@ -276,6 +278,7 @@ export async function getEmployee(
  */
 export async function getMyProfile(accessToken: string): Promise<Employee> {
   return fetchWithAuth<Employee>(
+<<<<<<< Updated upstream
     `${EMPLOYEE_SERVICE_URL}/employees/me`,
     accessToken,
   );
@@ -291,13 +294,17 @@ export async function listEmployees(
 ): Promise<EmployeeListResponse> {
   const queryParams = new URLSearchParams();
 
-  if (params.offset !== undefined) queryParams.append("offset", params.offset.toString());
-  if (params.limit !== undefined) queryParams.append("limit", params.limit.toString());
+  if (params.offset !== undefined)
+    queryParams.append("offset", params.offset.toString());
+  if (params.limit !== undefined)
+    queryParams.append("limit", params.limit.toString());
   if (params.department) queryParams.append("department", params.department);
   if (params.status) queryParams.append("status", params.status);
-  if (params.employment_type) queryParams.append("employment_type", params.employment_type);
+  if (params.employment_type)
+    queryParams.append("employment_type", params.employment_type);
   if (params.search) queryParams.append("search", params.search);
 
+<<<<<<< Updated upstream
   const url = `${EMPLOYEE_SERVICE_URL}/employees?${queryParams.toString()}`;
   return fetchWithAuth<EmployeeListResponse>(url, accessToken);
 }
@@ -310,6 +317,7 @@ export async function getEmployeeSummary(
   department?: string,
 ): Promise<EmployeeSummary[]> {
   const url = department
+<<<<<<< Updated upstream
     ? `${EMPLOYEE_SERVICE_URL}/employees/summary?department=${department}`
     : `${EMPLOYEE_SERVICE_URL}/employees/summary`;
 
@@ -324,6 +332,7 @@ export async function searchEmployees(
   query: string,
 ): Promise<Employee[]> {
   return fetchWithAuth<Employee[]>(
+<<<<<<< Updated upstream
     `${EMPLOYEE_SERVICE_URL}/employees/search?q=${encodeURIComponent(query)}`,
     accessToken,
   );
@@ -337,6 +346,7 @@ export async function getEmploymentHistory(
   accessToken: string,
 ): Promise<EmploymentHistoryEntry[]> {
   return fetchWithAuth<EmploymentHistoryEntry[]>(
+<<<<<<< Updated upstream
     `${EMPLOYEE_SERVICE_URL}/employees/${employeeId}/history`,
     accessToken,
   );
@@ -354,6 +364,7 @@ export async function getTeamMembers(
   accessToken: string,
 ): Promise<Team> {
   return fetchWithAuth<Team>(
+<<<<<<< Updated upstream
     `${EMPLOYEE_SERVICE_URL}/teams/${managerId}/members`,
     accessToken,
   );
@@ -367,6 +378,7 @@ export async function getOrganizationHierarchy(
   accessToken: string,
 ): Promise<HierarchyNode> {
   return fetchWithAuth<HierarchyNode>(
+<<<<<<< Updated upstream
     `${EMPLOYEE_SERVICE_URL}/hierarchy`,
     accessToken,
   );
@@ -380,6 +392,7 @@ export async function getReportingChain(
   accessToken: string,
 ): Promise<ReportingChain> {
   return fetchWithAuth<ReportingChain>(
+<<<<<<< Updated upstream
     `${EMPLOYEE_SERVICE_URL}/hierarchy/${employeeId}`,
     accessToken,
   );
@@ -398,6 +411,7 @@ export async function getSalarySummary(
   department?: string,
 ): Promise<SalarySummary> {
   const url = department
+<<<<<<< Updated upstream
     ? `${EMPLOYEE_SERVICE_URL}/reports/salary-summary?department=${department}`
     : `${EMPLOYEE_SERVICE_URL}/reports/salary-summary`;
 
@@ -411,6 +425,7 @@ export async function getHeadcountReport(
   accessToken: string,
 ): Promise<HeadcountReport> {
   return fetchWithAuth<HeadcountReport>(
+<<<<<<< Updated upstream
     `${EMPLOYEE_SERVICE_URL}/reports/headcount`,
     accessToken,
   );
@@ -423,6 +438,7 @@ export async function getProbationStatus(
   accessToken: string,
 ): Promise<ProbationStatusReport> {
   return fetchWithAuth<ProbationStatusReport>(
+<<<<<<< Updated upstream
     `${EMPLOYEE_SERVICE_URL}/reports/probation-status`,
     accessToken,
   );
@@ -436,6 +452,7 @@ export async function getContractsExpiring(
   days?: number,
 ): Promise<ContractsExpiringReport> {
   const url = days
+<<<<<<< Updated upstream
     ? `${EMPLOYEE_SERVICE_URL}/reports/contracts-expiring?days=${days}`
     : `${EMPLOYEE_SERVICE_URL}/reports/contracts-expiring`;
 
@@ -450,6 +467,7 @@ export async function getUpcomingAnniversaries(
   days?: number,
 ): Promise<Anniversary[]> {
   const url = days
+<<<<<<< Updated upstream
     ? `${EMPLOYEE_SERVICE_URL}/reports/anniversaries?days=${days}`
     : `${EMPLOYEE_SERVICE_URL}/reports/anniversaries`;
 
@@ -464,6 +482,7 @@ export async function getUpcomingBirthdays(
   days?: number,
 ): Promise<Birthday[]> {
   const url = days
+<<<<<<< Updated upstream
     ? `${EMPLOYEE_SERVICE_URL}/reports/birthdays?days=${days}`
     : `${EMPLOYEE_SERVICE_URL}/reports/birthdays`;
 
@@ -481,6 +500,7 @@ export async function getDashboardMetrics(
   accessToken: string,
 ): Promise<DashboardMetrics> {
   return fetchWithAuth<DashboardMetrics>(
+<<<<<<< Updated upstream
     `${EMPLOYEE_SERVICE_URL}/dashboard/metrics`,
     accessToken,
   );
@@ -494,14 +514,17 @@ export async function getDashboardMetrics(
  * Get unique departments from employee list
  */
 export function getUniqueDepartments(employees: Employee[]): string[] {
-  const departments = new Set(employees.map(e => e.department));
+  const departments = new Set(employees.map((e) => e.department));
   return Array.from(departments).sort();
 }
 
 /**
  * Format salary for display
  */
-export function formatSalary(salary: number | undefined, currency: string = "USD"): string {
+export function formatSalary(
+  salary: number | undefined,
+  currency: string = "USD",
+): string {
   if (salary === undefined) return "N/A";
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -549,11 +572,12 @@ export function getStatusColor(status: string): string {
  * Check if user can see salary data
  */
 export function canSeeSalary(userRoles: string[]): boolean {
-  return userRoles.some(role =>
-    role.includes("HR_Admin") ||
-    role.includes("HR_Manager") ||
-    role.includes("HR_Administrators") ||
-    role.includes("HR_Managers")
+  return userRoles.some(
+    (role) =>
+      role.includes("HR_Admin") ||
+      role.includes("HR_Manager") ||
+      role.includes("HR_Administrators") ||
+      role.includes("HR_Managers"),
   );
 }
 

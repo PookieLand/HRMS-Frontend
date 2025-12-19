@@ -269,9 +269,8 @@ export default function AttendancePage() {
 
   const handleCheckIn = async () => {
     try {
-      await attendanceAPI.checkIn({
-        location: "Office",
-      });
+      // Call self check-in endpoint without a request body (backend expects no body)
+      await attendanceAPI.checkIn();
 
       toast({
         title: "Checked In Successfully",
@@ -290,7 +289,8 @@ export default function AttendancePage() {
 
   const handleCheckOut = async () => {
     try {
-      await attendanceAPI.checkOut({});
+      // Call self check-out endpoint without a request body (backend expects no body)
+      await attendanceAPI.checkOut();
 
       toast({
         title: "Checked Out Successfully",
